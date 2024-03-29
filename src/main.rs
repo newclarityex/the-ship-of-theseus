@@ -1,33 +1,21 @@
-use bevy::{
-    prelude::*, 
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle}
-};
+use core::CorePlugin;
+
+use bevy::prelude::*;
+
+mod core;
+
+
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
+enum GameState {
+    StartMenu,
+    Game,
+}
+
 
 fn main() {
     App::new()
     .add_plugins(DefaultPlugins)
-    .add_systems(Startup, setup)
+    .add_plugins(CorePlugin)
+    .insert_state(GameState::StartMenu)
     .run();
-}
-
-
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    commands.spawn(Camera2dBundle::default());
-
-    let circle = Mesh2dHandle(meshes.add(Circle { radius: 50.0 }));
-
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: circle,
-        material: materials.add(Color::WHITE),
-        transform: Transform::from_xyz(
-            0.,
-            0.,
-            0.,
-        ),
-        ..default()
-    });
 }
