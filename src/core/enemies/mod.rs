@@ -211,7 +211,7 @@ fn spawn_blahaj(
             ai::SurroundAI {
                 chase_speed: 75.,
                 surround_speed: 5.,
-                surround_distance: 100.,
+                surround_distance: 125.,
                 clockwise: true,
             },
             SpriteBundle {
