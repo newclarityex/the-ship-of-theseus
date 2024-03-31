@@ -225,8 +225,8 @@ fn setup_upper_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 "0",
                                 TextStyle {
                                     font: asset_server.load("fonts/pixel_font.ttf"),
-                                    font_size: 42.,
-                                    color: Color::BLACK,
+                                    font_size: 56.,
+                                    color: Color::WHITE,
                                 },
                             ),
                             ..default()
@@ -260,8 +260,8 @@ fn update_timer_gui(
         format!("{:.0}", ingame_time.0),
         TextStyle {
             font: asset_server.load("fonts/pixel_font.ttf"),
-            font_size: 42.,
-            color: Color::BLACK,
+            font_size: 56.,
+            color: Color::WHITE,
         },
     );
 }

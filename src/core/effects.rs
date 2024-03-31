@@ -59,7 +59,7 @@ fn handle_damage_events(
 
         let pos = transform.translation.xy().extend(3.);
 
-        let text_color = Color::rgb(1., 0.75, 0.);
+        let text_color = Color::rgb(1., 0.60, 0.);
 
         let fade_tween = Tween::new(
             EaseMethod::Linear,
@@ -120,7 +120,7 @@ fn handle_stat_events(
         let mut final_pos = pos;
         final_pos.y += 150.;
 
-        let text_color = Color::rgb(0.4, 0., 1.);
+        let text_color = Color::rgb(0.5, 0., 1.);
 
         let fade_tween = Tween::new(
             EaseMethod::Linear,
