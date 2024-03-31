@@ -163,7 +163,7 @@ pub fn trigger_weapons(
                     ActiveCollisionTypes::STATIC_STATIC,
                     ActiveEvents::COLLISION_EVENTS,
                     ContactWeapon {
-                        pierce: 0 + player_leveling.pierce,
+                        pierce: 1 + player_leveling.pierce,
                         damage: 15. * player_leveling.damage_multiplier,
                     },
                     SpearBehavior {

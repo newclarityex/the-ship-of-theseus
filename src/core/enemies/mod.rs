@@ -324,7 +324,7 @@ fn damage_enemies(
 }
 
 const XP_ATTRACT_RANGE: f32 = 300.;
-const XP_COLLECT_RANGE: f32 = 25.;
+const XP_COLLECT_RANGE: f32 = 50.;
 fn update_xp_orbs(
     mut commands: Commands,
     time: Res<Time>,
