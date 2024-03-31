@@ -95,10 +95,10 @@ impl ItemSpawnTables {
             },
             480..600 => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
-            }
+            },
             600..i32::MAX => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
-            }
+            },
         })
     }
 }
