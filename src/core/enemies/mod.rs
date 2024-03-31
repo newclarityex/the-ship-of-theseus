@@ -104,7 +104,7 @@ impl EnemySpawnTables {
     fn default() -> Self {
         EnemySpawnTables(range_map! {
             0..60 => EnemySpawnTable {
-                global_rate: 150,
+                global_rate: 200,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             60..120 => EnemySpawnTable {
