@@ -207,7 +207,6 @@ fn handle_ranged_ai(
                         texture: asset_server.load("sprites/projectiles/wyvern_fire.png"),
                         transform: Transform {
                             translation: ranged_transform.translation,
-                            rotation: Quat::from_rotation_z(angle),
                             ..default()
                         },
                         ..default()

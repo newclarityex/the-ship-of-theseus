@@ -74,7 +74,7 @@ const BOW_COOLDOWN: f32 = 0.25;
 const SPEAR_COOLDOWN: f32 = 1.;
 const GREEK_FIRE_COOLDOWN: f32 = 3.;
 const POSEIDON_TRIDENT_COOLDOWN: f32 = 1.25;
-const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 1.5;
+const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 1.;
 
 pub fn trigger_weapons(
     mut commands: Commands,
@@ -254,7 +254,6 @@ pub fn trigger_weapons(
                         texture: asset_server.load("sprites/projectiles/greek_fire_bomb.png"),
                         transform: Transform {
                             translation: player_pos.extend(0.),
-                            rotation: Quat::from_rotation_z(throw_angle),
                             ..default()
                         },
                         ..default()
