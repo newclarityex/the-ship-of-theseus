@@ -119,7 +119,7 @@ fn handle_stat_events(
         let mut final_pos = pos;
         final_pos.y += 150.;
 
-        let text_color = Color::rgb(0.4, 0., 0.8);
+        let text_color = Color::rgb(0.4, 0., 1.);
 
         let fade_tween = Tween::new(
             EaseMethod::Linear,
