@@ -32,7 +32,7 @@ fn setup_items_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>
             style: Style {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
-                // flex_direction: FlexDirection::Column,
+                flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 ..default()
@@ -44,7 +44,7 @@ fn setup_items_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        margin: UiRect::top(Val::Px(124.)),
+                        margin: UiRect::top(Val::Px(32.)),
                         column_gap: Val::Px(12.),
                         ..default()
                     },
@@ -55,7 +55,7 @@ fn setup_items_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>
                         parent
                             .spawn((NodeBundle {
                                 style: Style {
-                                    border: UiRect::all(Val::Px(4.)),
+                                    border: UiRect::all(Val::Px(2.)),
                                     ..default()
                                 },
                                 border_color: Color::rgb(0.2, 0.2, 0.2).into(),

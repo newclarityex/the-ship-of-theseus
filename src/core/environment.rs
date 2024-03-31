@@ -146,46 +146,50 @@ fn update_chunks(
         let chunk_y_range = (chunk_pos.y)..(chunk_pos.y + CHUNK_SIZE);
 
         let mut rng = thread_rng();
-        if rng.gen_bool(ITEM_RATE.into()) && IVec2::ZERO != *chunk {
+        if rng.gen_bool(ITEM_RATE.into()) {
             let spawn_location = Vec2::new(
                 rng.gen_range(chunk_x_range.clone()),
                 rng.gen_range(chunk_y_range.clone()),
             );
-            let item = item_spawn_table.item_rates[item_weights.sample(&mut rng)].item_type;
+            if (spawn_location - current_pos.xy()).length() > 500. {
+                let item = item_spawn_table.item_rates[item_weights.sample(&mut rng)].item_type;
 
-            commands.spawn((
-                Chunk { pos: *chunk },
-                ItemPickup { item_type: item },
-                Collider::ball(32.),
-                Sensor,
-                ActiveEvents::COLLISION_EVENTS,
-                SpriteBundle {
-                    texture: asset_server.load(get_item_sprite(&item)),
-                    transform: Transform::from_translation(spawn_location.extend(0.)),
-                    ..default()
-                },
-                YSort(0.),
-            ));
+                commands.spawn((
+                    Chunk { pos: *chunk },
+                    ItemPickup { item_type: item },
+                    Collider::ball(32.),
+                    Sensor,
+                    ActiveEvents::COLLISION_EVENTS,
+                    SpriteBundle {
+                        texture: asset_server.load(get_item_sprite(&item)),
+                        transform: Transform::from_translation(spawn_location.extend(0.)),
+                        ..default()
+                    },
+                    YSort(0.),
+                ));
+            };
         }
-        if rng.gen_bool(ROCK_RATE.into()) && IVec2::ZERO != *chunk {
+        if rng.gen_bool(ROCK_RATE.into()) {
             let spawn_location = Vec2::new(
                 rng.gen_range(chunk_x_range.clone()),
                 rng.gen_range(chunk_y_range.clone()),
             );
-            commands.spawn((
-                Chunk { pos: *chunk },
-                EnemyKnockback { knockback: 160. },
-                ContactEnemy,
-                Collider::ball(16.),
-                Sensor,
-                ActiveEvents::COLLISION_EVENTS,
-                SpriteBundle {
-                    texture: asset_server.load("sprites/obstacles/rock.png"),
-                    transform: Transform::from_translation(spawn_location.extend(0.)),
-                    ..default()
-                },
-                YSort(0.),
-            ));
+            if (spawn_location - current_pos.xy()).length() > 500. {
+                commands.spawn((
+                    Chunk { pos: *chunk },
+                    EnemyKnockback { knockback: 160. },
+                    ContactEnemy,
+                    Collider::ball(16.),
+                    Sensor,
+                    ActiveEvents::COLLISION_EVENTS,
+                    SpriteBundle {
+                        texture: asset_server.load("sprites/obstacles/rock.png"),
+                        transform: Transform::from_translation(spawn_location.extend(0.)),
+                        ..default()
+                    },
+                    YSort(0.),
+                ));
+            };
         }
 
         commands.spawn((

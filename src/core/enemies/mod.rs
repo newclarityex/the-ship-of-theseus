@@ -7,7 +7,7 @@ use rand::{
 use rangemap::{range_map, RangeMap};
 use std::{f32::consts::PI, time::Duration};
 
-use self::ai::{AIPlugin, ChaseAI, SurroundAI};
+use self::ai::{AIPlugin, ChaseAI, KrakenAI, SurroundAI};
 
 use super::{
     player::{Player, XpGained},
@@ -104,9 +104,17 @@ impl EnemySpawnTables {
                 global_rate: 2,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
-            60..i32::MAX => EnemySpawnTable {
-                global_rate: 2,
+            60..120 => EnemySpawnTable {
+                global_rate: 5,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            120..300 => EnemySpawnTable {
+                global_rate: 10,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            300..i32::MAX=> EnemySpawnTable {
+                global_rate: 25,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             }
         })
     }
@@ -194,7 +202,7 @@ fn spawn_blahaj(
             ai::SurroundAI {
                 chase_speed: 75.,
                 surround_speed: 5.,
-                surround_distance: 75.,
+                surround_distance: 100.,
                 clockwise: true,
             },
             SpriteBundle {
@@ -255,6 +263,7 @@ fn damage_enemies(
                 .remove::<ContactEnemy>()
                 .remove::<SurroundAI>()
                 .remove::<ChaseAI>()
+                .remove::<KrakenAI>()
                 .insert((Animator::new(tween), TweenDespawn));
 
             let big_xp = (enemy_xp.0 / BIG_ORB) as i32;
