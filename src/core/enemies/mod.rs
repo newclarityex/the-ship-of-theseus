@@ -198,7 +198,7 @@ fn spawn_blahaj(
             },
             SpriteBundle {
                 transform: Transform::from_translation(spawn_position.extend(0.)),
-                texture: asset_server.load("other/blahaj.png"),
+                texture: asset_server.load("sprites/other/blahaj.png"),
                 ..default()
             },
         ));
