@@ -82,13 +82,13 @@ impl ItemSpawnTables {
     fn default() -> Self {
         ItemSpawnTables(range_map! {
             0..60 => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 2 }, ItemRate { item_type: Item::Bow, weight: 2 }, ItemRate { item_type: Item::GreekFire, weight: 1 }],
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 5 }, ItemRate { item_type: Item::Bow, weight: 5 }, ItemRate { item_type: Item::GreekFire, weight: 1 }],
             },
             60..120 => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 9 }, ItemRate { item_type: Item::GreekFire, weight: 9 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 10 }, ItemRate { item_type: Item::GreekFire, weight: 5 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
             120..180 => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 4 }, ItemRate { item_type: Item::GreekFire, weight: 4 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 5 }, ItemRate { item_type: Item::GreekFire, weight: 5 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
             180..240 => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 2 }, ItemRate { item_type: Item::GreekFire, weight: 2 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],

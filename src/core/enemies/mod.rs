@@ -116,19 +116,19 @@ impl EnemySpawnTables {
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 1}],
             },
             180..240 => EnemySpawnTable {
-                global_rate: 450,
+                global_rate: 500,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             240..300=> EnemySpawnTable {
-                global_rate: 500,
+                global_rate: 750,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 2}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 1}],
             },
             300..360=> EnemySpawnTable {
-                global_rate: 750,
+                global_rate: 1000,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             360..420=> EnemySpawnTable {
-                global_rate: 1000,
+                global_rate: 1250,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             420..480=> EnemySpawnTable {
