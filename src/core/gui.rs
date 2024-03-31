@@ -68,8 +68,8 @@ fn setup_items_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>
                                         ItemSprite,
                                         NodeBundle {
                                             style: Style {
-                                                width: Val::Px(64.0),
-                                                height: Val::Px(64.0),
+                                                width: Val::Px(32.0),
+                                                height: Val::Px(32.0),
                                                 ..default()
                                             },
                                             background_color: Color::WHITE.into(),
