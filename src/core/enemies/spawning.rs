@@ -194,8 +194,8 @@ pub fn spawn_hydra(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         ),
         Enemy,
         Health {
-            health: 250.,
-            max_health: 250.,
+            health: 500.,
+            max_health: 500.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
@@ -232,8 +232,8 @@ pub fn spawn_wyvern(
         ),
         Enemy,
         Health {
-            health: 150.,
-            max_health: 150.,
+            health: 300.,
+            max_health: 300.,
         },
         SurroundAI {
             chase_speed: 150.,
@@ -273,8 +273,8 @@ pub fn spawn_kraken(
         (Collider::ball(16.0), Sensor, ActiveEvents::COLLISION_EVENTS),
         Enemy,
         Health {
-            health: 1000.,
-            max_health: 1000.,
+            health: 2500.,
+            max_health: 2500.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
