@@ -133,13 +133,13 @@ fn show_tutorial(
 
     let mut pos = player_transform.translation;
     pos.z = 5.;
-    pos.y += 150;
+    pos.y += 150.;
 
     commands.spawn((
         Tutorial,
         SpriteBundle {
             texture: asset_server.load("sprites/other/tutorial.png"),
-            transform: pos,
+            transform: Transform::from_translation(pos),
             ..default()
         },
     ));
