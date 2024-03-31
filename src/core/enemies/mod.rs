@@ -106,14 +106,18 @@ impl EnemySpawnTables {
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             120..180 => EnemySpawnTable {
-                global_rate: 5,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+                global_rate: 3,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 10}, EnemyRate { enemy_type: EnemyType::Siren, weight: 10}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             180..240 => EnemySpawnTable {
+                global_rate: 5,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            240..300=> EnemySpawnTable {
                 global_rate: 10,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
-            240..i32::MAX=> EnemySpawnTable {
+            300..i32::MAX=> EnemySpawnTable {
                 global_rate: 25,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             }
