@@ -79,7 +79,7 @@ const PIERCE_LEVELS: u32 = 10;
 const RATE_LEVELS: u32 = 5;
 const DAMAGE_LEVELS: u32 = 1;
 
-const XP_SCALING: f32 = 50.;
+const XP_SCALING: f32 = 25.;
 
 fn handle_xp(
     mut ev_xp_gained: EventReader<XpGained>,
@@ -102,10 +102,10 @@ fn handle_xp(
                 leveling.pierce += 1;
                 ev_stat_increase.send(StatIncrease("PEN++".into()));
             } else if leveling.level % RATE_LEVELS == 0 {
-                leveling.rate_multiplier += 0.2;
+                leveling.rate_multiplier += 0.1;
                 ev_stat_increase.send(StatIncrease("SPD++".into()));
             } else if leveling.level % DAMAGE_LEVELS == 0 {
-                leveling.damage_multiplier += 0.2;
+                leveling.damage_multiplier += 0.1;
                 ev_stat_increase.send(StatIncrease("DMG++".into()));
             }
         }
