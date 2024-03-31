@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
-use std::collections::HashSet;
+use bevy_tweening::{lens::SpriteColorLens, Animator, EaseMethod, Tween};
+use std::{collections::HashSet, time::Duration};
 
 use crate::core::{
     enemies::{ContactEnemy, DamageEvent, Enemy, Health, Targetable},
-    GameState, Movement,
+    GameDespawn, GameState, Movement, PauseState, TweenDespawn, YSort,
 };
 
 pub struct ProjectileBehaviorsPlugin;
@@ -13,8 +14,15 @@ impl Plugin for ProjectileBehaviorsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (handle_homing, handle_spear, handle_weapon_collisions)
-                .run_if(in_state(GameState::Game)),
+            (
+                handle_homing,
+                handle_spear,
+                handle_fire,
+                handle_weapon_collisions,
+                handle_fire_collisions,
+            )
+                .run_if(in_state(GameState::Game))
+                .run_if(in_state(PauseState::Running)),
         );
     }
 }
@@ -29,6 +37,58 @@ pub struct ContactWeapon {
 pub struct SpearBehavior {
     pub angle: f32,
     pub speed: f32,
+}
+
+#[derive(Component)]
+pub struct BombBehavior {
+    pub damage: f32,
+    pub lifetime: f32,
+}
+
+#[derive(Component)]
+pub struct FireBehavior {
+    pub damage: f32,
+    pub lifetime: f32,
+    pub contact: HashSet<Entity>,
+    pub timer: Timer,
+}
+
+fn handle_fire(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut fire_query: Query<(Entity, &mut FireBehavior)>,
+    mut ev_damage: EventWriter<DamageEvent>,
+) {
+    for (fire_entity, mut fire) in fire_query.iter_mut() {
+        fire.lifetime -= time.delta_seconds();
+        fire.timer.tick(time.delta());
+
+        if fire.timer.just_finished() {
+            for enemy_entity in fire.contact.iter() {
+                ev_damage.send(DamageEvent {
+                    damage: fire.damage,
+                    entity: *enemy_entity,
+                });
+            }
+        }
+
+        if fire.lifetime < 0. {
+            let fade_tween = Tween::new(
+                EaseMethod::Linear,
+                Duration::from_secs_f32(0.5),
+                SpriteColorLens {
+                    start: Color::WHITE,
+                    end: Color::WHITE.with_a(0.),
+                },
+            )
+            .with_completed_event(0);
+
+            commands
+                .entity(fire_entity)
+                .insert((TweenDespawn, Animator::new(fade_tween)))
+                .remove::<FireBehavior>();
+        }
+    }
 }
 
 fn handle_spear(time: Res<Time>, mut spear_query: Query<(&mut Transform, &SpearBehavior)>) {
@@ -86,12 +146,15 @@ fn handle_homing(
 
 fn handle_weapon_collisions(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut collision_events: EventReader<CollisionEvent>,
-    mut contact_weapons_query: Query<(&mut ContactWeapon, Entity, Option<&mut HomingBehavior>)>,
-    mut enemy_query: Query<
-        (&mut Health, Entity, Option<&mut Movement>),
-        (With<Enemy>, With<Targetable>),
-    >,
+    mut contact_weapons_query: Query<(
+        &mut ContactWeapon,
+        Entity,
+        Option<&mut HomingBehavior>,
+        Option<&BombBehavior>,
+    )>,
+    mut enemy_query: Query<(Entity, &Transform), (With<Enemy>, With<Targetable>)>,
     mut ev_damage: EventWriter<DamageEvent>,
 ) {
     for collision_event in collision_events.read() {
@@ -102,8 +165,8 @@ fn handle_weapon_collisions(
                 let mut maybe_enemies = enemy_query.iter_many_mut(entities);
 
                 if let (
-                    Some((mut weapon, weapon_entity, homing_behavior)),
-                    Some((mut enemy_health, enemy_entity, enemy_movement)),
+                    Some((mut weapon, weapon_entity, homing_behavior, bomb_behavior)),
+                    Some((enemy_entity, enemy_transform)),
                 ) = (maybe_weapons.fetch_next(), maybe_enemies.fetch_next())
                 {
                     weapon.pierce -= 1;
@@ -116,6 +179,31 @@ fn handle_weapon_collisions(
                         homing_behavior.collided.insert(enemy_entity);
                     }
 
+                    if let Some(bomb_behavior) = bomb_behavior {
+                        commands.spawn((
+                            Collider::ball(64.),
+                            Sensor,
+                            ActiveCollisionTypes::STATIC_STATIC,
+                            ActiveEvents::COLLISION_EVENTS,
+                            FireBehavior {
+                                lifetime: bomb_behavior.lifetime,
+                                damage: bomb_behavior.damage,
+                                contact: HashSet::new(),
+                                timer: Timer::from_seconds(0.5, TimerMode::Repeating),
+                            },
+                            SpriteBundle {
+                                texture: asset_server.load("sprites/projectiles/greek_fire.png"),
+                                transform: Transform {
+                                    translation: enemy_transform.translation,
+                                    ..default()
+                                },
+                                ..default()
+                            },
+                            YSort(-1.),
+                            GameDespawn,
+                        ));
+                    }
+
                     ev_damage.send(DamageEvent {
                         damage: weapon.damage,
                         entity: enemy_entity,
@@ -123,6 +211,39 @@ fn handle_weapon_collisions(
                 };
             }
             _ => {}
+        }
+    }
+}
+
+fn handle_fire_collisions(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut fire_query: Query<&mut FireBehavior>,
+    mut enemy_query: Query<Entity, (With<Targetable>, With<Enemy>)>,
+) {
+    for collision_event in collision_events.read() {
+        match collision_event {
+            CollisionEvent::Started(entity_one, entity_two, _) => {
+                let entities = [entity_one, entity_two];
+                let mut maybe_fire = fire_query.iter_many_mut(entities);
+                let mut maybe_enemies = enemy_query.iter_many_mut(entities);
+
+                if let (Some((mut fire_behavior)), Some((enemy_entity))) =
+                    (maybe_fire.fetch_next(), maybe_enemies.fetch_next())
+                {
+                    fire_behavior.contact.insert(enemy_entity);
+                };
+            }
+            CollisionEvent::Stopped(entity_one, entity_two, _) => {
+                let entities = [entity_one, entity_two];
+                let mut maybe_fire = fire_query.iter_many_mut(entities);
+                let mut maybe_enemies = enemy_query.iter_many_mut(entities);
+
+                if let (Some((mut fire_behavior)), Some((enemy_entity))) =
+                    (maybe_fire.fetch_next(), maybe_enemies.fetch_next())
+                {
+                    fire_behavior.contact.remove(&enemy_entity);
+                };
+            }
         }
     }
 }

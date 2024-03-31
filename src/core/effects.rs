@@ -6,7 +6,7 @@ use bevy_tweening::{
 use rand::{thread_rng, Rng};
 use std::time::Duration;
 
-use crate::core::GameState;
+use crate::core::{GameState, PauseState};
 
 use super::{
     enemies::{DamageEvent, Health},
@@ -20,7 +20,9 @@ impl Plugin for EffectsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (handle_damage_events, handle_stat_events).run_if(in_state(GameState::Game)),
+            (handle_damage_events, handle_stat_events)
+                .run_if(in_state(GameState::Game))
+                .run_if(in_state(PauseState::Running)),
         );
     }
 }

@@ -2,7 +2,10 @@ use bevy::{prelude::*, transform};
 use bevy_rapier2d::prelude::*;
 use std::f32::consts::PI;
 
-use crate::core::{player::Player, DistanceDespawn, GameState, Movement, TimedDespawn, YSort};
+use crate::core::{
+    player::Player, DistanceDespawn, GameDespawn, GameState, Movement, PauseState, TimedDespawn,
+    YSort,
+};
 
 use super::{ContactEnemy, EnemyKnockback};
 
@@ -15,11 +18,12 @@ impl Plugin for AIPlugin {
             (
                 handle_chase_ai,
                 handle_surround_ai,
-                handle_siren_ai,
+                handle_ranged_ai,
                 handle_kraken_ai,
                 update_linear_projectiles,
             )
-                .run_if(in_state(GameState::Game)),
+                .run_if(in_state(GameState::Game))
+                .run_if(in_state(PauseState::Running)),
         );
     }
 }
@@ -41,9 +45,15 @@ struct SurroundingAI {
     pub angle: f32,
 }
 
+pub enum EnemyAmmo {
+    Siren,
+    Wyvern,
+}
+
 #[derive(Component)]
-pub struct SirenAI {
+pub struct RangedAI {
     pub timer: Timer,
+    pub ammo: EnemyAmmo,
 }
 #[derive(Component)]
 pub struct KrakenAI {
@@ -146,45 +156,72 @@ fn handle_surround_ai(
     }
 }
 
-fn handle_siren_ai(
+fn handle_ranged_ai(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     time: Res<Time>,
     player_query: Query<&Transform, With<Player>>,
-    mut surrounding_siren_query: Query<(&mut SirenAI, &Transform), With<SurroundingAI>>,
+    mut ranged_query: Query<(&mut RangedAI, &Transform), With<SurroundingAI>>,
 ) {
     let player_transform = player_query.get_single().unwrap();
 
-    for (mut siren, siren_transform) in surrounding_siren_query.iter_mut() {
-        siren.timer.tick(time.delta());
+    for (mut attacker, ranged_transform) in ranged_query.iter_mut() {
+        attacker.timer.tick(time.delta());
 
-        if !siren.timer.just_finished() {
+        if !attacker.timer.just_finished() {
             continue;
         }
 
-        let direction = (player_transform.translation.xy() - siren_transform.translation.xy())
+        let direction = (player_transform.translation.xy() - ranged_transform.translation.xy())
             .normalize_or_zero();
         let angle = direction.to_angle();
 
-        commands.spawn((
-            ContactEnemy,
-            LinearProjectile { angle, speed: 80. },
-            SpriteBundle {
-                texture: asset_server.load("sprites/projectiles/siren_attack.png"),
-                transform: Transform {
-                    translation: siren_transform.translation,
-                    rotation: Quat::from_rotation_z(angle),
-                    ..default()
-                },
-                ..default()
-            },
-            TimedDespawn { delay: 10. },
-            DistanceDespawn,
-            YSort(0.),
-            Sensor,
-            Collider::ball(14.),
-            EnemyKnockback { knockback: 120. },
-        ));
+        match attacker.ammo {
+            EnemyAmmo::Siren => {
+                commands.spawn((
+                    ContactEnemy,
+                    LinearProjectile { angle, speed: 80. },
+                    SpriteBundle {
+                        texture: asset_server.load("sprites/projectiles/siren_attack.png"),
+                        transform: Transform {
+                            translation: ranged_transform.translation,
+                            rotation: Quat::from_rotation_z(angle),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    TimedDespawn { delay: 10. },
+                    DistanceDespawn,
+                    YSort(0.),
+                    Sensor,
+                    Collider::ball(14.),
+                    EnemyKnockback { knockback: 120. },
+                    GameDespawn,
+                ));
+            }
+            EnemyAmmo::Wyvern => {
+                commands.spawn((
+                    ContactEnemy,
+                    LinearProjectile { angle, speed: 100. },
+                    SpriteBundle {
+                        texture: asset_server.load("sprites/projectiles/wyvern_fire.png"),
+                        transform: Transform {
+                            translation: ranged_transform.translation,
+                            rotation: Quat::from_rotation_z(angle),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    TimedDespawn { delay: 10. },
+                    DistanceDespawn,
+                    YSort(0.),
+                    Sensor,
+                    Collider::ball(14.),
+                    EnemyKnockback { knockback: 300. },
+                    GameDespawn,
+                ));
+            }
+        }
     }
 }
 
@@ -229,6 +266,7 @@ fn handle_kraken_ai(
                 Sensor,
                 Collider::ball(14.),
                 EnemyKnockback { knockback: 600. },
+                GameDespawn,
             ));
         }
     }

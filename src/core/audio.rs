@@ -23,36 +23,23 @@ impl Plugin for AudioManagerPlugin {
             .insert_resource(MusicVolume(0.25))
             .add_audio_channel::<SFXChannel>()
             .insert_resource(SFXVolume(0.25))
-            // .add_systems(OnEnter(GameState::StartMenu), start_menu_music)
+            .add_systems(OnEnter(GameState::StartMenu), start_menu_music)
             // .add_systems(OnExit(GameState::StartMenu), stop_menu_music)
             .add_systems(OnEnter(GameState::Game), start_game_music)
-            .add_systems(OnExit(GameState::Game), stop_game_music)
             .add_systems(Update, update_volume);
     }
 }
-
-#[derive(Resource)]
-struct MenuMusic(Handle<AudioInstance>);
-
-#[derive(Resource)]
-struct GameMusic(Handle<AudioInstance>);
 
 fn start_menu_music(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     music_channel: Res<AudioChannel<MusicChannel>>,
 ) {
-    // let asset_handle = asset_server.load("audio/music/menu.ogg");
-    // let instance_handle = music_channel.play(asset_handle).looped().handle();
-    // commands.insert_resource(MenuMusic(instance_handle));
-}
+    music_channel.stop();
 
-fn stop_menu_music(handle: Res<MenuMusic>, mut audio_instances: ResMut<Assets<AudioInstance>>) {
-    // let Some(instance) = audio_instances.get_mut(&handle.0) else {
-    //     return;
-    // };
+    let asset_handle = asset_server.load("audio/music/menu.ogg");
 
-    // instance.stop(AudioTween::default());
+    let instance_handle = music_channel.play(asset_handle).looped().handle();
 }
 
 fn start_game_music(
@@ -60,18 +47,11 @@ fn start_game_music(
     asset_server: Res<AssetServer>,
     music_channel: Res<AudioChannel<MusicChannel>>,
 ) {
+    music_channel.stop();
+
     let asset_handle = asset_server.load("audio/music/game.ogg");
-    // let instance_handle = music_channel.play(asset_handle).looped().handle();
+
     let instance_handle = music_channel.play(asset_handle).loop_from(25.5).handle();
-    commands.insert_resource(GameMusic(instance_handle));
-}
-
-fn stop_game_music(handle: Res<GameMusic>, mut audio_instances: ResMut<Assets<AudioInstance>>) {
-    let Some(instance) = audio_instances.get_mut(&handle.0) else {
-        return;
-    };
-
-    instance.stop(AudioTween::default());
 }
 
 fn update_volume(

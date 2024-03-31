@@ -7,38 +7,47 @@ use rand::{
 use rangemap::{range_map, RangeMap};
 use std::{collections::HashSet, f32::consts::PI};
 
-use crate::core::GameState;
+use crate::core::{GameState, PauseState};
 
 use super::{
     enemies::{ContactEnemy, Enemy, EnemyKnockback},
     items::{get_item_sprite, Inventory, Item, INVENTORY_SIZE},
     player::Player,
-    IngameTime, YSort,
+    GameDespawn, GameStats, IngameTime, YSort,
 };
 
 pub struct BackgroundPlugin;
 
 impl Plugin for BackgroundPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(CurrentChunks(HashSet::new()))
-            // .add_systems(OnEnter(GameState::Game), setup_background)
+        app.insert_resource(CurrentTileChunks(HashSet::new()))
+            .insert_resource(CurrentEntityChunks(HashSet::new()))
             .insert_resource(ItemSpawnTables::default())
-            // .add_systems(OnExit(GameState::Game), cleanup_chunks)
-            .add_systems(Update, (update_chunks, update_offset))
+            .add_systems(Update, (update_tile_chunks, update_offset))
             .add_systems(
                 Update,
-                (handle_item_pickups).run_if(in_state(GameState::Game)),
-            );
+                update_entity_chunks.run_if(in_state(GameState::Game)),
+            )
+            .add_systems(
+                Update,
+                (handle_item_pickups)
+                    .run_if(in_state(GameState::Game))
+                    .run_if(in_state(PauseState::Running)),
+            )
+            .add_systems(OnEnter(GameState::Game), cleanup_entity_chunks);
     }
 }
 
-const TILE_SIZE: f32 = 32.;
-const CHUNK_SIZE: f32 = TILE_SIZE * 10.;
+const TILE_SIZE: f32 = 64.;
+const CHUNK_SIZE: f32 = TILE_SIZE * 5.;
 const RENDER_DISTANCE_Y: u16 = 4;
 const RENDER_DISTANCE_X: u16 = 4;
 
 #[derive(Resource, Debug)]
-pub struct CurrentChunks(HashSet<IVec2>);
+pub struct CurrentTileChunks(HashSet<IVec2>);
+
+#[derive(Resource, Debug)]
+pub struct CurrentEntityChunks(HashSet<IVec2>);
 
 #[derive(Component)]
 struct Chunk {
@@ -72,32 +81,44 @@ struct ItemSpawnTables(RangeMap<i32, ItemSpawnTable>);
 impl ItemSpawnTables {
     fn default() -> Self {
         ItemSpawnTables(range_map! {
-            0..30 => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }],
+            0..60 => ItemSpawnTable {
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 2 }, ItemRate { item_type: Item::Bow, weight: 2 }, ItemRate { item_type: Item::GreekFire, weight: 1 }],
             },
-            30..i32::MAX => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 8 }, ItemRate { item_type: Item::PoseidonTrident, weight: 2 }],
+            60..120 => ItemSpawnTable {
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 9 }, ItemRate { item_type: Item::GreekFire, weight: 9 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
+            },
+            120..180 => ItemSpawnTable {
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 4 }, ItemRate { item_type: Item::GreekFire, weight: 4 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
+            },
+            180..240 => ItemSpawnTable {
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 2 }, ItemRate { item_type: Item::GreekFire, weight: 2 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
+            },
+            240..i32::MAX => ItemSpawnTable {
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             }
         })
     }
 }
 
 // Per Chunk
-const ITEM_RATE: f32 = 0.1;
+const ITEM_RATE: f32 = 0.7;
 
 // Per Chunk
-const ROCK_RATE: f32 = 0.65;
+const ROCK_RATE: f32 = 0.8;
 
 fn get_chunks_needed(
-    current_chunk: &IVec2,
+    current_tile_chunk: &IVec2,
     render_distance_x: u16,
     render_distance_y: u16,
 ) -> Vec<IVec2> {
     let render_distance_x = i32::from(render_distance_x);
     let render_distance_y = i32::from(render_distance_y);
     let mut chunks_needed: Vec<IVec2> = Vec::new();
-    for x in (current_chunk.x - render_distance_x)..=(current_chunk.x + render_distance_x) {
-        for y in (current_chunk.y - render_distance_y)..=(current_chunk.y + render_distance_y) {
+    for x in (current_tile_chunk.x - render_distance_x)..=(current_tile_chunk.x + render_distance_x)
+    {
+        for y in
+            (current_tile_chunk.y - render_distance_y)..=(current_tile_chunk.y + render_distance_y)
+        {
             chunks_needed.push(IVec2::new(x, y));
         }
     }
@@ -105,12 +126,121 @@ fn get_chunks_needed(
     chunks_needed
 }
 
-fn update_chunks(
+#[derive(Component)]
+struct TileChunk;
+
+fn update_tile_chunks(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut current_tile_chunks: ResMut<CurrentTileChunks>,
+    player_query: Query<&Transform, With<Player>>,
+    tile_chunks_query: Query<(Entity, &Chunk), With<TileChunk>>,
+) {
+    // Create new chunks
+    let Ok(transform) = player_query.get_single() else {
+        return;
+    };
+
+    let current_pos = transform.translation;
+    let current_chunk = (current_pos.xy() / CHUNK_SIZE).as_ivec2();
+
+    let chunks_needed = get_chunks_needed(&current_chunk, RENDER_DISTANCE_X, RENDER_DISTANCE_Y);
+
+    for chunk in &chunks_needed {
+        if current_tile_chunks.0.contains(&chunk) {
+            continue;
+        };
+
+        current_tile_chunks.0.insert(*chunk);
+
+        let chunk_pos = chunk.as_vec2() * CHUNK_SIZE;
+        let chunk_x_range = (chunk_pos.x)..(chunk_pos.x + CHUNK_SIZE);
+        let chunk_y_range = (chunk_pos.y)..(chunk_pos.y + CHUNK_SIZE);
+
+        // commands.spawn((
+        //     Chunk { pos: *chunk },
+        //     SpriteBundle {
+        //         texture: asset_server.load("sprites/tiles/water_layer_2.png"),
+        //         transform: Transform::from_translation(chunk_pos.extend(0.)),
+        //         sprite: Sprite {
+        //             custom_size: Some(Vec2::splat(CHUNK_SIZE)),
+        //             color: Color::rgba(1., 1., 1., 0.5),
+        //             ..default()
+        //         },
+        //         ..default()
+        //     },
+        //     ImageScaleMode::Tiled {
+        //         tile_x: true,
+        //         tile_y: true,
+        //         stretch_value: 1.0, // The image will tile every 128px
+        //     },
+        //     AnimateOffset {
+        //         angle: 0.25 * PI,
+        //         speed: 3.,
+        //     },
+        //     YSort(-2.),
+        // ));
+
+        commands.spawn((
+            Chunk { pos: *chunk },
+            SpriteBundle {
+                texture: asset_server.load("sprites/tiles/water_layer_1.png"),
+                transform: Transform::from_translation(chunk_pos.extend(0.)),
+                sprite: Sprite {
+                    custom_size: Some(Vec2::splat(CHUNK_SIZE)),
+                    color: Color::rgba(1., 1., 1., 0.5),
+                    ..default()
+                },
+                ..default()
+            },
+            ImageScaleMode::Tiled {
+                tile_x: true,
+                tile_y: true,
+                stretch_value: 1.0, // The image will tile every 128px
+            },
+            AnimateOffset {
+                angle: 0.25 * PI,
+                speed: 3.,
+            },
+            YSort(-3.),
+        ));
+
+        commands.spawn((
+            Chunk { pos: *chunk },
+            SpriteBundle {
+                texture: asset_server.load("sprites/tiles/water_bg.png"),
+                transform: Transform::from_translation(chunk_pos.extend(0.)),
+                sprite: Sprite {
+                    custom_size: Some(Vec2::splat(CHUNK_SIZE)),
+                    ..default()
+                },
+                ..default()
+            },
+            ImageScaleMode::Tiled {
+                tile_x: true,
+                tile_y: true,
+                stretch_value: 1.0, // The image will tile every 128px
+            },
+            YSort(-4.),
+        ));
+    }
+
+    for (entity, chunk) in tile_chunks_query.iter() {
+        if !chunks_needed.contains(&chunk.pos) {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+#[derive(Component)]
+struct EntityChunk;
+
+fn update_entity_chunks(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     player_query: Query<&Transform, With<Player>>,
-    chunks_query: Query<(Entity, &Chunk)>,
-    mut current_chunks: ResMut<CurrentChunks>,
+    entity_chunks_query: Query<(Entity, &Chunk), With<EntityChunk>>,
+    mut current_entity_chunks: ResMut<CurrentEntityChunks>,
     ingame_time: Res<IngameTime>,
     item_spawn_tables: Res<ItemSpawnTables>,
 ) {
@@ -135,11 +265,11 @@ fn update_chunks(
     let chunks_needed = get_chunks_needed(&current_chunk, RENDER_DISTANCE_X, RENDER_DISTANCE_Y);
 
     for chunk in &chunks_needed {
-        if current_chunks.0.contains(&chunk) {
+        if current_entity_chunks.0.contains(&chunk) {
             continue;
         };
 
-        current_chunks.0.insert(*chunk);
+        current_entity_chunks.0.insert(*chunk);
 
         let chunk_pos = chunk.as_vec2() * CHUNK_SIZE;
         let chunk_x_range = (chunk_pos.x)..(chunk_pos.x + CHUNK_SIZE);
@@ -155,6 +285,7 @@ fn update_chunks(
                 let item = item_spawn_table.item_rates[item_weights.sample(&mut rng)].item_type;
 
                 commands.spawn((
+                    EntityChunk,
                     Chunk { pos: *chunk },
                     ItemPickup { item_type: item },
                     Collider::ball(32.),
@@ -166,6 +297,7 @@ fn update_chunks(
                         ..default()
                     },
                     YSort(0.),
+                    GameDespawn,
                 ));
             };
         }
@@ -176,6 +308,7 @@ fn update_chunks(
             );
             if (spawn_location - current_pos.xy()).length() > 500. {
                 commands.spawn((
+                    EntityChunk,
                     Chunk { pos: *chunk },
                     EnemyKnockback { knockback: 160. },
                     ContactEnemy,
@@ -188,107 +321,40 @@ fn update_chunks(
                         ..default()
                     },
                     YSort(0.),
+                    GameDespawn,
                 ));
             };
         }
-
-        commands.spawn((
-            Chunk { pos: *chunk },
-            SpriteBundle {
-                texture: asset_server.load("sprites/tiles/water_layer_2.png"),
-                transform: Transform::from_translation(chunk_pos.extend(0.)),
-                sprite: Sprite {
-                    custom_size: Some(Vec2::splat(CHUNK_SIZE)),
-                    color: Color::rgba(1., 1., 1., 0.5),
-                    ..default()
-                },
-                ..default()
-            },
-            ImageScaleMode::Tiled {
-                tile_x: true,
-                tile_y: true,
-                stretch_value: 1.0, // The image will tile every 128px
-            },
-            AnimateOffset {
-                angle: 0.25 * PI,
-                speed: 3.,
-            },
-            YSort(-1.),
-        ));
-
-        commands.spawn((
-            Chunk { pos: *chunk },
-            SpriteBundle {
-                texture: asset_server.load("sprites/tiles/water_layer_1.png"),
-                transform: Transform::from_translation(chunk_pos.extend(0.)),
-                sprite: Sprite {
-                    custom_size: Some(Vec2::splat(CHUNK_SIZE)),
-                    ..default()
-                },
-                ..default()
-            },
-            ImageScaleMode::Tiled {
-                tile_x: true,
-                tile_y: true,
-                stretch_value: 1.0, // The image will tile every 128px
-            },
-            AnimateOffset {
-                angle: 0.75 * PI,
-                speed: 1.3,
-            },
-            YSort(-2.),
-        ));
-
-        commands.spawn((
-            Chunk { pos: *chunk },
-            SpriteBundle {
-                texture: asset_server.load("sprites/tiles/water_bg.png"),
-                transform: Transform::from_translation(chunk_pos.extend(0.)),
-                sprite: Sprite {
-                    custom_size: Some(Vec2::splat(CHUNK_SIZE)),
-                    ..default()
-                },
-                ..default()
-            },
-            ImageScaleMode::Tiled {
-                tile_x: true,
-                tile_y: true,
-                stretch_value: 1.0, // The image will tile every 128px
-            },
-            YSort(-3.),
-        ));
     }
 
-    // Clear unused chunks
-    for (entity, chunk) in chunks_query.iter() {
+    for (entity, chunk) in entity_chunks_query.iter() {
         if !chunks_needed.contains(&chunk.pos) {
-            current_chunks.0.remove(&chunk.pos);
             commands.entity(entity).despawn_recursive();
         }
     }
 }
 
-fn cleanup_chunks(
+fn cleanup_entity_chunks(
     mut commands: Commands,
-    chunks_query: Query<Entity, With<Chunk>>,
-    mut current_chunks: ResMut<CurrentChunks>,
+    chunks_query: Query<Entity, With<EntityChunk>>,
+    mut current_entity_chunks: ResMut<CurrentEntityChunks>,
 ) {
-    current_chunks.0.clear();
+    current_entity_chunks.0.clear();
 
     for entity in chunks_query.iter() {
-        commands.entity(entity).despawn();
+        commands.entity(entity).despawn_recursive();
     }
 }
 
 fn update_offset(
-    ingame_time: Res<IngameTime>,
+    time: Res<Time>,
     mut offsets_query: Query<(&Chunk, &AnimateOffset, &mut Transform)>,
 ) {
     for (chunk, animate_offset, mut transform) in offsets_query.iter_mut() {
         let pos = chunk.pos.as_vec2() * CHUNK_SIZE;
 
         let mut pos_offset =
-            Vec2::from_angle(animate_offset.angle) * animate_offset.speed * ingame_time.0;
+            Vec2::from_angle(animate_offset.angle) * animate_offset.speed * time.elapsed_seconds();
         pos_offset.x %= TILE_SIZE;
         pos_offset.y %= TILE_SIZE;
         pos_offset = pos_offset.trunc();
@@ -306,6 +372,7 @@ fn handle_item_pickups(
     mut inventory: ResMut<Inventory>,
     mut item_pickups_query: Query<(&ItemPickup, Entity)>,
     player_query: Query<&Player>,
+    mut game_stats: ResMut<GameStats>,
 ) {
     for collision_event in collision_events.read() {
         match collision_event {
@@ -322,6 +389,7 @@ fn handle_item_pickups(
                     if inventory.0.len() > INVENTORY_SIZE {
                         inventory.0.pop_front();
                     }
+                    game_stats.items_collected += 1;
                 };
             }
             _ => {}

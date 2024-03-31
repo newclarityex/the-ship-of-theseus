@@ -13,9 +13,10 @@ use self::ai::{AIPlugin, ChaseAI, KrakenAI, SurroundAI};
 
 use super::{
     player::{Player, XpGained},
-    DistanceDespawn, IngameState, IngameTime, Movement, TimedDespawn, TweenDespawn, YSort,
+    DistanceDespawn, GameDespawn, GameStats, IngameTime, Movement, TimedDespawn, TweenDespawn,
+    YSort,
 };
-use crate::core::GameState;
+use crate::core::{GameState, PauseState};
 
 mod ai;
 mod spawning;
@@ -32,8 +33,9 @@ impl Plugin for EnemiesPlugin {
                 Update,
                 (spawn_enemies, spawn_blahaj, damage_enemies, update_xp_orbs)
                     .run_if(in_state(GameState::Game))
-                    .run_if(in_state(IngameState::Playing)),
-            );
+                    .run_if(in_state(PauseState::Running)),
+            )
+            .add_systems(OnEnter(GameState::Game), handle_game_cleanup);
     }
 }
 
@@ -64,6 +66,9 @@ enum EnemyType {
     Ferris,
     Serpent,
     Siren,
+    EliteSerpent,
+    Hydra,
+    Wyvern,
     Kraken,
 }
 
@@ -99,31 +104,59 @@ impl EnemySpawnTables {
     fn default() -> Self {
         EnemySpawnTables(range_map! {
             0..60 => EnemySpawnTable {
-                global_rate: 1,
+                global_rate: 100,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             60..120 => EnemySpawnTable {
-                global_rate: 2,
+                global_rate: 150,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             120..180 => EnemySpawnTable {
-                global_rate: 3,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 10}, EnemyRate { enemy_type: EnemyType::Siren, weight: 10}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+                global_rate: 300,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 1}],
             },
             180..240 => EnemySpawnTable {
-                global_rate: 5,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 10}, EnemyRate { enemy_type: EnemyType::Siren, weight: 10}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+                global_rate: 500,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             240..300=> EnemySpawnTable {
-                global_rate: 7,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+                global_rate: 750,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 2}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 1}],
             },
-            300..i32::MAX=> EnemySpawnTable {
-                global_rate: 25,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
-            }
+            300..360=> EnemySpawnTable {
+                global_rate: 1000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            360..420=> EnemySpawnTable {
+                global_rate: 1250,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            420..480=> EnemySpawnTable {
+                global_rate: 1500,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            480..540=> EnemySpawnTable {
+                global_rate: 2000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            540..600=> EnemySpawnTable {
+                global_rate: 2500,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            600..660=> EnemySpawnTable {
+                global_rate: 3000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            660..i32::MAX=> EnemySpawnTable {
+                global_rate: 5000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
         })
     }
+}
+
+fn handle_game_cleanup(mut last_spawn: ResMut<LastSpawn>) {
+    last_spawn.0 = 0.;
 }
 
 fn spawn_enemies(
@@ -149,7 +182,7 @@ fn spawn_enemies(
     .unwrap();
 
     while last_spawn.0 < ingame_time.0 {
-        last_spawn.0 += 1. / enemy_spawn_table.global_rate as f32;
+        last_spawn.0 += 1. / enemy_spawn_table.global_rate as f32 * 100.;
 
         let entities = enemies_query.iter().count();
         if entities >= ENTITY_LIMIT {
@@ -175,6 +208,13 @@ fn spawn_enemies(
                 spawning::spawn_serpent(&mut commands, &asset_server, spawn_position)
             }
             EnemyType::Siren => spawning::spawn_siren(&mut commands, &asset_server, spawn_position),
+            EnemyType::EliteSerpent => {
+                spawning::spawn_elite_serpent(&mut commands, &asset_server, spawn_position)
+            }
+            EnemyType::Hydra => spawning::spawn_hydra(&mut commands, &asset_server, spawn_position),
+            EnemyType::Wyvern => {
+                spawning::spawn_wyvern(&mut commands, &asset_server, spawn_position)
+            }
             EnemyType::Kraken => {
                 spawning::spawn_kraken(&mut commands, &asset_server, spawn_position)
             }
@@ -212,6 +252,7 @@ fn spawn_blahaj(
                 pierce: -1,
                 damage: 20.,
             },
+            ActiveCollisionTypes::STATIC_STATIC,
             ai::SurroundAI {
                 chase_speed: 75.,
                 surround_speed: 5.,
@@ -223,6 +264,7 @@ fn spawn_blahaj(
                 texture: asset_server.load("sprites/other/blahaj.png"),
                 ..default()
             },
+            GameDespawn,
         ));
     }
 }
@@ -237,13 +279,17 @@ fn damage_enemies(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut ev_damage: EventReader<DamageEvent>,
-    mut enemy_query: Query<(
-        Entity,
-        &mut Health,
-        &EnemyXp,
-        &Transform,
-        Option<&mut Movement>,
-    )>,
+    mut enemy_query: Query<
+        (
+            Entity,
+            &mut Health,
+            &EnemyXp,
+            &Transform,
+            Option<&mut Movement>,
+        ),
+        With<Enemy>,
+    >,
+    mut game_stats: ResMut<GameStats>,
 ) {
     for event in ev_damage.read() {
         let Ok((enemy_entity, mut enemy_health, enemy_xp, enemy_transform, enemy_movement)) =
@@ -259,6 +305,8 @@ fn damage_enemies(
         };
 
         if enemy_health.health < 0. {
+            game_stats.enemies_killed += 1;
+
             let tween = Tween::new(
                 EaseMethod::Linear,
                 Duration::from_secs_f32(0.5),
@@ -272,6 +320,7 @@ fn damage_enemies(
             commands
                 .entity(enemy_entity)
                 .remove::<Enemy>()
+                .remove::<Health>()
                 .remove::<Movement>()
                 .remove::<ContactEnemy>()
                 .remove::<SurroundAI>()
@@ -300,6 +349,7 @@ fn damage_enemies(
                     YSort(0.),
                     DistanceDespawn,
                     TimedDespawn { delay: 30. },
+                    GameDespawn,
                 ));
             }
             for i in 0..small_xp as i32 {
@@ -321,6 +371,7 @@ fn damage_enemies(
                     YSort(0.),
                     DistanceDespawn,
                     TimedDespawn { delay: 30. },
+                    GameDespawn,
                 ));
             }
         }

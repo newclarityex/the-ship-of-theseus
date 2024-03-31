@@ -6,10 +6,10 @@ use bevy_tweening::EaseMethod;
 use bevy_tweening::Tween;
 use std::time::Duration;
 
-use crate::core::GameState;
 use crate::core::YSort;
+use crate::core::{GameState, PauseState};
 
-use super::IngameState;
+use super::TweenDespawn;
 use super::{
     enemies::{ContactEnemy, EnemyKnockback},
     items::Inventory,
@@ -34,9 +34,10 @@ impl Plugin for PlayerPlugin {
                     handle_xp,
                 )
                     .run_if(in_state(GameState::Game))
-                    .run_if(in_state(IngameState::Playing)),
+                    .run_if(in_state(PauseState::Running)),
             )
-            .add_systems(OnEnter(IngameState::GameOver), (handle_dead));
+            .add_systems(OnEnter(GameState::GameOver), (handle_dead))
+            .add_systems(OnEnter(GameState::Game), (reset_player, show_tutorial));
     }
 }
 
@@ -60,6 +61,18 @@ pub struct Leveling {
     pub pierce: i32,
     pub damage_multiplier: f32,
     pub rate_multiplier: f32,
+}
+
+impl Leveling {
+    fn default() -> Self {
+        Leveling {
+            level: 1,
+            xp: 0.,
+            pierce: 0,
+            damage_multiplier: 1.0,
+            rate_multiplier: 1.0,
+        }
+    }
 }
 
 const PIERCE_LEVELS: u32 = 10;
@@ -109,6 +122,19 @@ pub struct InvulnerabilityTimer {
     timer: Timer,
 }
 
+#[derive(Component)]
+pub struct Tutorial;
+fn show_tutorial(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn((
+        Tutorial,
+        SpriteBundle {
+            texture: asset_server.load("sprites/other/tutorial.png"),
+            transform: Transform::from_xyz(0., 150., 5.),
+            ..default()
+        },
+    ));
+}
+
 fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let invuln_duration = Duration::from_secs_f32(1.);
 
@@ -116,7 +142,7 @@ fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     invuln_timer.set_elapsed(invuln_duration);
 
     commands.spawn((
-        Collider::capsule_x(48.0, 16.0),
+        Collider::capsule_x(44.0, 12.0),
         Sensor,
         ActiveCollisionTypes::STATIC_STATIC,
         ActiveEvents::COLLISION_EVENTS,
@@ -127,9 +153,9 @@ fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             max_speed: 150.,
         },
         SpriteBundle {
-            texture: asset_server.load("sprites/player_ship.png"),
+            texture: asset_server.load("sprites/other/player_ship.png"),
             sprite: Sprite {
-                anchor: Anchor::Custom(Vec2::new(0., -0.06)),
+                anchor: Anchor::Custom(Vec2::new(0., -0.075)),
                 ..default()
             },
             ..default()
@@ -138,14 +164,23 @@ fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             timer: invuln_timer,
         },
         YSort(0.),
-        Leveling {
-            level: 1,
-            xp: 0.,
-            pierce: 0,
-            damage_multiplier: 1.0,
-            rate_multiplier: 1.0,
-        },
+        Leveling::default(),
     ));
+}
+
+fn reset_player(
+    mut commands: Commands,
+    mut player_query: Query<(&mut Sprite, &mut Leveling, &mut Movement, Entity), With<Player>>,
+) {
+    let (mut player_sprite, mut player_leveling, mut player_movement, player_entity) =
+        player_query.get_single_mut().unwrap();
+
+    commands.entity(player_entity).remove::<Animator<Sprite>>();
+
+    player_sprite.color = Color::WHITE;
+    *player_leveling = Leveling::default();
+
+    player_movement.velocity = Vec2::ZERO;
 }
 
 fn update_camera(
@@ -160,9 +195,11 @@ fn update_camera(
 }
 
 fn handle_movement(
+    mut commands: Commands,
     mut player_query: Query<(&Player, &mut Movement, &mut Sprite)>,
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
+    tutorial_query: Query<Entity, With<Tutorial>>,
 ) {
     let mut direction = Vec2::ZERO;
 
@@ -189,6 +226,24 @@ fn handle_movement(
         player_sprite.flip_x = false;
     };
 
+    if normalized.length() > 0. {
+        if let Ok(tutorial_query) = tutorial_query.get_single() {
+            let fade_tween = Tween::new(
+                EaseMethod::Linear,
+                Duration::from_secs_f32(3.),
+                SpriteColorLens {
+                    start: Color::WHITE.with_a(1.),
+                    end: Color::WHITE.with_a(0.),
+                },
+            );
+
+            commands
+                .entity(tutorial_query)
+                .remove::<Tutorial>()
+                .insert((TweenDespawn, Animator::new(fade_tween)));
+        }
+    }
+
     let acceleration = player.acceleration;
     player_movement.velocity += acceleration * normalized * time.delta_seconds();
 }
@@ -209,12 +264,11 @@ fn handle_player_invuln(
 }
 
 fn handle_player_collisions(
-    mut commands: Commands,
     mut collision_events: EventReader<CollisionEvent>,
-    mut next_ingame_state: ResMut<NextState<IngameState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
     mut inventory: ResMut<Inventory>,
     mut player_query: Query<(&mut InvulnerabilityTimer, &mut Movement, &Transform), With<Player>>,
-    enemies_query: Query<(&ContactEnemy, &Transform, Option<&EnemyKnockback>)>,
+    enemies_query: Query<(&Transform, Option<&EnemyKnockback>), With<ContactEnemy>>,
 ) {
     for collision_event in collision_events.read() {
         match collision_event {
@@ -224,7 +278,7 @@ fn handle_player_collisions(
                 let mut maybe_player = player_query.iter_many_mut(entities);
 
                 if let (
-                    Some((contact_enemy, enemy_transform, enemy_knockback)),
+                    Some((enemy_transform, enemy_knockback)),
                     Some((mut player_invuln, mut player_movement, player_transform)),
                 ) = (maybe_enemy.fetch_next(), maybe_player.fetch_next())
                 {
@@ -240,7 +294,7 @@ fn handle_player_collisions(
                         player_movement.velocity += direction * enemy_knockback.knockback;
                     }
                     if inventory.0.len() == 0 {
-                        next_ingame_state.set(IngameState::GameOver);
+                        next_game_state.set(GameState::GameOver);
                     } else {
                         player_invuln.timer.reset();
                         inventory.0.pop_front();
@@ -252,7 +306,7 @@ fn handle_player_collisions(
     }
 }
 
-fn handle_dead(mut commands: Commands, mut player_query: Query<Entity, With<Player>>) {
+fn handle_dead(mut commands: Commands, player_query: Query<Entity, With<Player>>) {
     let player_entity = player_query.get_single().unwrap();
     let fade_tween = Tween::new(
         EaseMethod::Linear,

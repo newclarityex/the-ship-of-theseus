@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{ecs::entity::Entities, prelude::*, render::camera::ScalingMode};
 use bevy_tweening::TweenCompleted;
 
 use self::player::Player;
@@ -25,47 +25,60 @@ impl Plugin for CorePlugin {
             audio::AudioManagerPlugin,
         ))
         .insert_resource(IngameTime(0.))
+        .insert_resource(GameStats::default())
         .insert_state(GameState::StartMenu)
-        .insert_state(IngameState::Playing)
+        .insert_state(PauseState::Running)
         .add_systems(Startup, setup_camera)
         .add_systems(
             Update,
-            (handle_start).run_if(in_state(GameState::StartMenu)),
+            (handle_start)
+                .run_if(in_state(GameState::StartMenu).or_else(in_state(GameState::GameOver))),
         )
         .add_systems(OnEnter(GameState::Game), setup_ingame_time)
         .add_systems(
             PreUpdate,
-            (update_ingame_time).run_if(in_state(GameState::Game)),
+            (update_ingame_time)
+                .run_if(in_state(GameState::Game))
+                .run_if(in_state(PauseState::Running)),
         )
         .add_systems(
             Update,
             (
-                (
-                    despawn_tween_entities,
-                    handle_distance_despawn,
-                    handle_timed_despawn,
-                )
-                    .run_if(in_state(GameState::Game)),
+                despawn_tween_entities,
+                (handle_distance_despawn, handle_timed_despawn)
+                    .run_if(in_state(GameState::Game))
+                    .run_if(in_state(PauseState::Running)),
                 y_sort,
+                handle_pause.run_if(in_state(GameState::Game)),
             ),
         )
         .add_systems(
             PostUpdate,
-            update_movement.run_if(in_state(GameState::Game)),
-        );
+            update_movement
+                .run_if(in_state(GameState::Game))
+                .run_if(in_state(PauseState::Running)),
+        )
+        .add_systems(OnEnter(GameState::Game), handle_game_cleanup);
     }
+}
+
+#[derive(Resource, Default)]
+pub struct GameStats {
+    enemies_killed: i32,
+    items_collected: i32,
 }
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 enum GameState {
     StartMenu,
     Game,
+    GameOver,
 }
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
-enum IngameState {
-    Playing,
-    GameOver,
+enum PauseState {
+    Running,
+    Paused,
 }
 
 #[derive(Component)]
@@ -177,6 +190,35 @@ fn handle_timed_despawn(
         timed_despawn.delay -= time.delta_seconds();
         if timed_despawn.delay < 0. {
             commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct GameDespawn;
+
+fn handle_game_cleanup(
+    mut commands: Commands,
+    mut despawn_query: Query<Entity, With<GameDespawn>>,
+    mut ingame_time: ResMut<IngameTime>,
+    mut game_stats: ResMut<GameStats>,
+) {
+    *game_stats = GameStats::default();
+    ingame_time.0 = 0.;
+    for entity in despawn_query.iter_mut() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+fn handle_pause(
+    keys: Res<ButtonInput<KeyCode>>,
+    pause_state: Res<State<PauseState>>,
+    mut next_pause_state: ResMut<NextState<PauseState>>,
+) {
+    if keys.just_pressed(KeyCode::Escape) {
+        match pause_state.get() {
+            PauseState::Paused => next_pause_state.set(PauseState::Running),
+            PauseState::Running => next_pause_state.set(PauseState::Paused),
         }
     }
 }
