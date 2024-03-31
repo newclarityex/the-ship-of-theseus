@@ -30,7 +30,7 @@ impl Plugin for EnemiesPlugin {
                 Update,
                 (spawn_enemies, spawn_blahaj, damage_enemies, update_xp_orbs)
                     .run_if(in_state(GameState::Game))
-                    .run_if(IngameState::Playing),
+                    .run_if(in_state(IngameState::Playing)),
             );
     }
 }
