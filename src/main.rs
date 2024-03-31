@@ -14,6 +14,6 @@ fn main() {
         .add_plugins((AnimationPlugin, TweeningPlugin))
         .add_plugins(CorePlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugins(RapierDebugRenderPlugin::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
         .run();
 }
