@@ -4,7 +4,7 @@ use std::f32::consts::PI;
 
 use crate::core::{player::Player, DistanceDespawn, GameState, Movement, TimedDespawn, YSort};
 
-use super::ContactEnemy;
+use super::{ContactEnemy, EnemyKnockback};
 
 pub struct AIPlugin;
 
@@ -183,6 +183,7 @@ fn handle_siren_ai(
             YSort(0.),
             Sensor,
             Collider::ball(14.),
+            EnemyKnockback { knockback: 200 },
         ));
     }
 }
@@ -227,6 +228,7 @@ fn handle_kraken_ai(
                 YSort(0.),
                 Sensor,
                 Collider::ball(14.),
+                EnemyKnockback { knockback: 600 },
             ));
         }
     }

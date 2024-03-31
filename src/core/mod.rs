@@ -59,8 +59,14 @@ impl Plugin for CorePlugin {
 enum GameState {
     StartMenu,
     Game,
-    Finished,
 }
+
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
+enum IngameState {
+    Playing,
+    GameOver,
+}
+
 #[derive(Component)]
 pub struct Movement {
     velocity: Vec2,
