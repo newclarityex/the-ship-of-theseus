@@ -1,5 +1,6 @@
 use crate::core::items::behaviors::ContactWeapon;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 use bevy_tweening::{lens::SpriteColorLens, Animator, EaseMethod, Tween};
 use rand::{
     distributions::{Distribution, WeightedIndex},
@@ -204,6 +205,9 @@ fn spawn_blahaj(
 
         commands.spawn((
             Blahaj,
+            Collider::capsule_x(16.0, 8.0),
+            Sensor,
+            ActiveEvents::COLLISION_EVENTS,
             ContactWeapon {
                 pierce: -1,
                 damage: 20.,
