@@ -147,8 +147,24 @@ impl EnemySpawnTables {
                 global_rate: 3000,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
-            660..i32::MAX=> EnemySpawnTable {
+            660..720=> EnemySpawnTable {
                 global_rate: 5000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            720..780=> EnemySpawnTable {
+                global_rate: 7500,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            780..840=> EnemySpawnTable {
+                global_rate: 10000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            840..900=> EnemySpawnTable {
+                global_rate: 15000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            900..i32::MAX=> EnemySpawnTable {
+                global_rate: 25000,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 4}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 4}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
         })
