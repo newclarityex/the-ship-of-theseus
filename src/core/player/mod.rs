@@ -43,7 +43,7 @@ pub struct LevelUp(pub u32);
 pub struct StatIncrease(pub String);
 
 pub fn level_required_xp(level: u32) -> f32 {
-    (45 + 5_i32.pow(level)) as f32
+    XP_SCALING * level as f32
 }
 
 #[derive(Component)]
@@ -52,10 +52,14 @@ pub struct Leveling {
     pub xp: f32,
     pub pierce: i32,
     pub damage_multiplier: f32,
+    pub rate_multiplier: f32,
 }
 
-const PIERCE_LEVELS: u32 = 5;
-const DAMAGE_INCREASE: f32 = 0.25;
+const PIERCE_LEVELS: u32 = 10;
+const RATE_LEVELS: u32 = 5;
+const DAMAGE_LEVELS: u32 = 1;
+
+const XP_SCALING: f32 = 50.;
 
 fn handle_xp(
     mut ev_xp_gained: EventReader<XpGained>,
@@ -76,10 +80,13 @@ fn handle_xp(
             ev_level_up.send(LevelUp(leveling.level));
             if leveling.level % PIERCE_LEVELS == 0 {
                 leveling.pierce += 1;
-                ev_stat_increase.send(StatIncrease("Pierce Increase!".into()));
-            } else {
-                leveling.damage_multiplier += DAMAGE_INCREASE;
-                ev_stat_increase.send(StatIncrease("Damage Increase!".into()));
+                ev_stat_increase.send(StatIncrease("PEN++".into()));
+            } else if leveling.level % RATE_LEVELS == 0 {
+                leveling.rate_multiplier += 0.2;
+                ev_stat_increase.send(StatIncrease("SPD++".into()));
+            } else if leveling.level % DAMAGE_LEVELS == 0 {
+                leveling.damage_multiplier += 0.2;
+                ev_stat_increase.send(StatIncrease("DMG++".into()));
             }
         }
     }
@@ -129,6 +136,7 @@ fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             xp: 0.,
             pierce: 0,
             damage_multiplier: 1.0,
+            rate_multiplier: 1.0,
         },
     ));
 }

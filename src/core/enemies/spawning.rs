@@ -1,7 +1,7 @@
 use crate::core::{DistanceDespawn, Movement, YSort};
 
 use super::{
-    ai::{ChaseAI, SurroundAI},
+    ai::{ChaseAI, SirenAI, SurroundAI},
     ContactEnemy, Enemy, EnemyKnockback, EnemyXp, Health, Targetable,
 };
 use bevy::prelude::*;
@@ -62,6 +62,7 @@ pub fn spawn_ferris(
         animations_manager,
         Targetable,
         EnemyXp(1.),
+        DistanceDespawn,
     ));
 }
 
@@ -76,8 +77,8 @@ pub fn spawn_serpent(
         ActiveEvents::COLLISION_EVENTS,
         Enemy,
         Health {
-            health: 20.,
-            max_health: 20.,
+            health: 45.,
+            max_health: 45.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
@@ -95,6 +96,7 @@ pub fn spawn_serpent(
         EnemyKnockback { knockback: 320. },
         Targetable,
         EnemyXp(5.),
+        DistanceDespawn,
     ));
 }
 
@@ -106,8 +108,8 @@ pub fn spawn_siren(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         ActiveEvents::COLLISION_EVENTS,
         Enemy,
         Health {
-            health: 50.,
-            max_health: 50.,
+            health: 15.,
+            max_health: 15.,
         },
         SurroundAI {
             chase_speed: 150.,
@@ -129,6 +131,10 @@ pub fn spawn_siren(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         EnemyKnockback { knockback: 320. },
         Targetable,
         EnemyXp(10.),
+        DistanceDespawn,
+        SirenAI {
+            timer: Timer::from_seconds(3., TimerMode::Repeating),
+        },
     ));
 }
 

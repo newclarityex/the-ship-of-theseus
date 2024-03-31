@@ -86,7 +86,7 @@ fn handle_damage_events(
                     ..default()
                 },
                 text: Text::from_section(
-                    event.damage.to_string(),
+                    format!("{:.0}", event.damage),
                     TextStyle {
                         font: asset_server.load("fonts/pixel_font.ttf"),
                         font_size: 28.,
@@ -119,7 +119,7 @@ fn handle_stat_events(
         let mut final_pos = pos;
         final_pos.y += 150.;
 
-        let text_color = Color::rgb(0., 0.2, 1.);
+        let text_color = Color::rgb(0.4, 0., 0.8);
 
         let fade_tween = Tween::new(
             EaseMethod::Linear,

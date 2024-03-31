@@ -11,7 +11,7 @@ use self::ai::{AIPlugin, ChaseAI, SurroundAI};
 
 use super::{
     player::{Player, XpGained},
-    DistanceDespawn, IngameTime, Movement, TweenDespawn, YSort,
+    DistanceDespawn, IngameTime, Movement, TimedDespawn, TweenDespawn, YSort,
 };
 use crate::GameState;
 
@@ -276,6 +276,7 @@ fn damage_enemies(
                     },
                     YSort(0.),
                     DistanceDespawn,
+                    TimedDespawn { delay: 30. },
                 ));
             }
             for i in 0..small_xp as i32 {
@@ -296,6 +297,7 @@ fn damage_enemies(
                     },
                     YSort(0.),
                     DistanceDespawn,
+                    TimedDespawn { delay: 30. },
                 ));
             }
         }

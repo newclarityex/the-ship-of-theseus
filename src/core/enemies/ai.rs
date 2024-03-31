@@ -1,11 +1,13 @@
+use bevy::{prelude::*, transform};
+use bevy_rapier2d::prelude::*;
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
-
 use crate::{
-    core::{player::Player, Movement},
+    core::{player::Player, DistanceDespawn, Movement, TimedDespawn, YSort},
     GameState,
 };
+
+use super::ContactEnemy;
 
 pub struct AIPlugin;
 
@@ -13,7 +15,13 @@ impl Plugin for AIPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (handle_chase_ai, handle_surround_ai).run_if(in_state(GameState::Game)),
+            (
+                handle_chase_ai,
+                handle_surround_ai,
+                handle_siren_ai,
+                update_linear_projectiles,
+            )
+                .run_if(in_state(GameState::Game)),
         );
     }
 }
@@ -33,6 +41,17 @@ pub struct SurroundAI {
 #[derive(Component)]
 struct SurroundingAI {
     pub angle: f32,
+}
+
+#[derive(Component)]
+pub struct SirenAI {
+    pub timer: Timer,
+}
+
+#[derive(Component)]
+struct LinearProjectile {
+    angle: f32,
+    speed: f32,
 }
 
 #[derive(Component)]
@@ -122,5 +141,55 @@ fn handle_surround_ai(
                 });
             }
         }
+    }
+}
+
+fn handle_siren_ai(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    time: Res<Time>,
+    player_query: Query<&Transform, With<Player>>,
+    mut surrounding_siren_query: Query<(&mut SirenAI, &Transform), With<SurroundingAI>>,
+) {
+    let player_transform = player_query.get_single().unwrap();
+
+    for (mut siren, siren_transform) in surrounding_siren_query.iter_mut() {
+        siren.timer.tick(time.delta());
+
+        if !siren.timer.just_finished() {
+            continue;
+        }
+
+        let direction = (player_transform.translation.xy() - siren_transform.translation.xy())
+            .normalize_or_zero();
+
+        commands.spawn((
+            ContactEnemy,
+            LinearProjectile {
+                angle: direction.to_angle(),
+                speed: 100.,
+            },
+            SpriteBundle {
+                texture: asset_server.load("sprites/projectiles/siren_attack.png"),
+                transform: Transform::from_translation(siren_transform.translation),
+                ..default()
+            },
+            TimedDespawn { delay: 10. },
+            DistanceDespawn,
+            YSort(0.),
+            Sensor,
+            Collider::ball(16.),
+        ));
+    }
+}
+fn update_linear_projectiles(
+    time: Res<Time>,
+    mut projectiles_query: Query<(&mut Transform, &LinearProjectile)>,
+) {
+    for (mut transform, projectile) in projectiles_query.iter_mut() {
+        let movement = Vec2::from_angle(projectile.angle) * projectile.speed * time.delta_seconds();
+        transform.rotation = Quat::from_rotation_z(projectile.angle);
+        transform.translation.x += movement.x;
+        transform.translation.y += movement.y;
     }
 }

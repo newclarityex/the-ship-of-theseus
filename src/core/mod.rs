@@ -38,7 +38,12 @@ impl Plugin for CorePlugin {
         .add_systems(
             Update,
             (
-                (despawn_tween_entities, handle_distance_despawn).run_if(in_state(GameState::Game)),
+                (
+                    despawn_tween_entities,
+                    handle_distance_despawn,
+                    handle_timed_despawn,
+                )
+                    .run_if(in_state(GameState::Game)),
                 y_sort,
             ),
         )
@@ -139,6 +144,24 @@ fn handle_distance_despawn(
     for (transform, entity) in despawn_query.iter() {
         let distance = (transform.translation.xy() - player_transform.translation.xy()).length();
         if distance > DESPAWN_DISTANCE {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct TimedDespawn {
+    delay: f32,
+}
+
+fn handle_timed_despawn(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut despawn_query: Query<(&mut TimedDespawn, Entity)>,
+) {
+    for (mut timed_despawn, entity) in despawn_query.iter_mut() {
+        timed_despawn.delay -= time.delta_seconds();
+        if timed_despawn.delay < 0. {
             commands.entity(entity).despawn_recursive();
         }
     }

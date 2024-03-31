@@ -97,7 +97,9 @@ pub fn trigger_weapons(
 
                 let last_fired = item_cooldowns.0.entry(item).or_insert(0.);
 
-                if ingame_time.0 - *last_fired < POSEIDON_TRIDENT_COOLDOWN / count as f32 {
+                if ingame_time.0 - *last_fired
+                    < POSEIDON_TRIDENT_COOLDOWN / count as f32 / player_leveling.rate_multiplier
+                {
                     continue;
                 };
 
@@ -145,7 +147,9 @@ pub fn trigger_weapons(
 
                 let last_fired = item_cooldowns.0.entry(item).or_insert(0.);
 
-                if ingame_time.0 - *last_fired < SPEAR_COOLDOWN / count as f32 {
+                if ingame_time.0 - *last_fired
+                    < SPEAR_COOLDOWN / count as f32 / player_leveling.rate_multiplier
+                {
                     continue;
                 };
 
