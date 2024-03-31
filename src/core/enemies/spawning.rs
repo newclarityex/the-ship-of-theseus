@@ -149,8 +149,8 @@ pub fn spawn_kraken(
         ActiveEvents::COLLISION_EVENTS,
         Enemy,
         Health {
-            health: 200.,
-            max_health: 200.,
+            health: 250.,
+            max_health: 250.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
