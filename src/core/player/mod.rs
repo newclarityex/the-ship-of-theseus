@@ -5,6 +5,7 @@ use std::time::Duration;
 use crate::core::GameState;
 use crate::core::YSort;
 
+use super::IngameState;
 use super::{
     enemies::{ContactEnemy, EnemyKnockback},
     items::Inventory,
@@ -204,7 +205,7 @@ fn handle_player_invuln(
 fn handle_player_collisions(
     mut commands: Commands,
     mut collision_events: EventReader<CollisionEvent>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    mut next_ingame_state: ResMut<NextState<IngameState>>,
     mut inventory: ResMut<Inventory>,
     mut player_query: Query<(&mut InvulnerabilityTimer, &mut Movement, &Transform), With<Player>>,
     enemies_query: Query<(&ContactEnemy, &Transform, Option<&EnemyKnockback>)>,
@@ -233,7 +234,7 @@ fn handle_player_collisions(
                         player_movement.velocity += direction * enemy_knockback.knockback;
                     }
                     if inventory.0.len() == 0 {
-                        next_game_state.set(GameState::Finished);
+                        next_ingame_state.set(IngameState::GameOver);
                     } else {
                         player_invuln.timer.reset();
                         inventory.0.pop_front();

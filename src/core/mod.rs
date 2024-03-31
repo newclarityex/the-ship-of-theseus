@@ -26,6 +26,7 @@ impl Plugin for CorePlugin {
         ))
         .insert_resource(IngameTime(0.))
         .insert_state(GameState::StartMenu)
+        .insert_state(IngameState::Playing)
         .add_systems(Startup, setup_camera)
         .add_systems(
             Update,

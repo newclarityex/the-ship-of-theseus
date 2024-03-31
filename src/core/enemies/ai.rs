@@ -183,7 +183,7 @@ fn handle_siren_ai(
             YSort(0.),
             Sensor,
             Collider::ball(14.),
-            EnemyKnockback { knockback: 200 },
+            EnemyKnockback { knockback: 120. },
         ));
     }
 }
@@ -228,7 +228,7 @@ fn handle_kraken_ai(
                 YSort(0.),
                 Sensor,
                 Collider::ball(14.),
-                EnemyKnockback { knockback: 600 },
+                EnemyKnockback { knockback: 600. },
             ));
         }
     }
