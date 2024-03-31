@@ -74,7 +74,7 @@ const BOW_COOLDOWN: f32 = 0.25;
 const SPEAR_COOLDOWN: f32 = 1.;
 const GREEK_FIRE_COOLDOWN: f32 = 1.5;
 const POSEIDON_TRIDENT_COOLDOWN: f32 = 1.25;
-const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 1.;
+const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 0.25;
 
 pub fn trigger_weapons(
     mut commands: Commands,

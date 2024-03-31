@@ -281,6 +281,7 @@ fn spawn_blahaj(
                 ..default()
             },
             GameDespawn,
+            YSort(0.),
         ));
     }
 }
