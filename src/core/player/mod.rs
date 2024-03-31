@@ -79,7 +79,7 @@ const PIERCE_LEVELS: u32 = 10;
 const RATE_LEVELS: u32 = 5;
 const DAMAGE_LEVELS: u32 = 1;
 
-const XP_SCALING: f32 = 50.;
+const XP_SCALING: f32 = 25.;
 
 fn handle_xp(
     mut ev_xp_gained: EventReader<XpGained>,

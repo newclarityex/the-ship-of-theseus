@@ -72,7 +72,7 @@ pub fn get_item_sprite(item: &Item) -> &'static str {
 const ATTACK_RANGE: f32 = 400.;
 const BOW_COOLDOWN: f32 = 0.25;
 const SPEAR_COOLDOWN: f32 = 1.;
-const GREEK_FIRE_COOLDOWN: f32 = 3.;
+const GREEK_FIRE_COOLDOWN: f32 = 1.5;
 const POSEIDON_TRIDENT_COOLDOWN: f32 = 1.25;
 const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 1.;
 
@@ -291,7 +291,7 @@ pub fn trigger_weapons(
                     ActiveCollisionTypes::STATIC_STATIC,
                     ActiveEvents::COLLISION_EVENTS,
                     ContactWeapon {
-                        pierce: 2 + player_leveling.pierce,
+                        pierce: 5 + player_leveling.pierce,
                         damage: 25. * player_leveling.damage_multiplier,
                     },
                     Movement {

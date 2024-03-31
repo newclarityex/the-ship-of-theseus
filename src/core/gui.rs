@@ -15,15 +15,18 @@ impl Plugin for GuiPlugin {
         app.insert_resource(ItemSprites(Vec::new()))
             .add_systems(OnEnter(GameState::StartMenu), setup_start_menu)
             .add_systems(OnExit(GameState::StartMenu), cleanup_start_menu)
-            .add_systems(OnEnter(GameState::Game), (setup_items_gui, setup_xp_gui))
-            .add_systems(OnExit(GameState::Game), (cleanup_items_gui, cleanup_xp_gui))
+            .add_systems(OnEnter(GameState::Game), (setup_items_gui, setup_upper_gui))
+            .add_systems(
+                OnExit(GameState::Game),
+                (cleanup_items_gui, cleanup_upper_gui),
+            )
             .add_systems(OnEnter(GameState::GameOver), (setup_stats_menu))
             .add_systems(OnExit(GameState::GameOver), (cleanup_stats_menu))
             .add_systems(OnEnter(PauseState::Paused), (setup_pause_menu))
             .add_systems(OnExit(PauseState::Paused), (cleanup_pause_menu))
             .add_systems(
                 Update,
-                (update_items_gui, update_xp_gui)
+                (update_items_gui, update_xp_gui, update_timer_gui)
                     .run_if(in_state(GameState::Game))
                     .run_if(in_state(PauseState::Running)),
             );
@@ -153,12 +156,15 @@ fn update_items_gui(
 struct XpBar;
 
 #[derive(Component)]
-struct XpBarContainer;
+struct UpperGuiContainer;
 
-fn setup_xp_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>) {
+#[derive(Component)]
+struct TimerGui;
+
+fn setup_upper_gui(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
-            XpBarContainer,
+            UpperGuiContainer,
             NodeBundle {
                 style: Style {
                     position_type: PositionType::Absolute,
@@ -176,6 +182,9 @@ fn setup_xp_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>) {
                         width: Val::Percent(100.0),
                         max_width: Val::Px(1024.),
                         padding: UiRect::all(Val::Px(24.)),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        row_gap: Val::Px(24.),
                         ..default()
                     },
                     ..default()
@@ -205,6 +214,24 @@ fn setup_xp_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>) {
                                 },
                             ));
                         });
+                    parent.spawn((
+                        TimerGui,
+                        TextBundle {
+                            style: Style {
+                                padding: UiRect::all(Val::Px(24.)),
+                                ..default()
+                            },
+                            text: Text::from_section(
+                                "0",
+                                TextStyle {
+                                    font: asset_server.load("fonts/pixel_font.ttf"),
+                                    font_size: 42.,
+                                    color: Color::BLACK,
+                                },
+                            ),
+                            ..default()
+                        },
+                    ));
                 });
         });
 }
@@ -220,22 +247,39 @@ fn update_xp_gui(
     xp_bar_style.width = Val::Percent(leveling.xp / required_xp * 100.);
 }
 
-fn cleanup_xp_gui(mut commands: Commands, xp_bar_query: Query<Entity, With<XpBarContainer>>) {
-    let Ok(xp_bar) = xp_bar_query.get_single() else {
+fn update_timer_gui(
+    asset_server: Res<AssetServer>,
+    ingame_time: Res<IngameTime>,
+    mut timer_gui_query: Query<&mut Text, With<TimerGui>>,
+) {
+    let Ok(mut timer_gui) = timer_gui_query.get_single_mut() else {
         return;
     };
 
-    commands.entity(xp_bar).despawn_recursive();
+    *timer_gui = Text::from_section(
+        format!("{:.0}", ingame_time.0),
+        TextStyle {
+            font: asset_server.load("fonts/pixel_font.ttf"),
+            font_size: 42.,
+            color: Color::BLACK,
+        },
+    );
+}
+fn cleanup_upper_gui(
+    mut commands: Commands,
+    upper_gui_query: Query<Entity, With<UpperGuiContainer>>,
+) {
+    let Ok(upper_gui) = upper_gui_query.get_single() else {
+        return;
+    };
+
+    commands.entity(upper_gui).despawn_recursive();
 }
 
 #[derive(Component)]
 struct StartMenu;
 
-fn setup_start_menu(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut item_sprites: ResMut<ItemSprites>,
-) {
+fn setup_start_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             StartMenu,
