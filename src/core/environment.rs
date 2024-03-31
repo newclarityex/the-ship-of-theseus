@@ -81,19 +81,22 @@ struct ItemSpawnTables(RangeMap<i32, ItemSpawnTable>);
 impl ItemSpawnTables {
     fn default() -> Self {
         ItemSpawnTables(range_map! {
-            0..60 => ItemSpawnTable {
+            0..120 => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 5 }, ItemRate { item_type: Item::Bow, weight: 5 }, ItemRate { item_type: Item::GreekFire, weight: 1 }],
             },
-            60..120 => ItemSpawnTable {
+            120..240 => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 10 }, ItemRate { item_type: Item::GreekFire, weight: 5 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
-            120..180 => ItemSpawnTable {
+            240..360 => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 5 }, ItemRate { item_type: Item::GreekFire, weight: 5 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
-            180..240 => ItemSpawnTable {
+            360..480 => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 2 }, ItemRate { item_type: Item::GreekFire, weight: 2 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
-            240..i32::MAX => ItemSpawnTable {
+            480..600 => ItemSpawnTable {
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
+            }
+            600..i32::MAX => ItemSpawnTable {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             }
         })
