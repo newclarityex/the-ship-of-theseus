@@ -8,8 +8,8 @@ mod core;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .insert_resource(AssetMetaCheck::Never)
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .insert_resource(Msaa::Off)
         .add_plugins((AnimationPlugin, TweeningPlugin))
         .add_plugins(CorePlugin)
