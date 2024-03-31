@@ -11,7 +11,7 @@ use self::ai::{AIPlugin, ChaseAI, SurroundAI};
 
 use super::{
     player::{Player, XpGained},
-    DistanceDespawn, IngameTime, Movement, TimedDespawn, TweenDespawn, YSort,
+    DistanceDespawn, IngameState, IngameTime, Movement, TimedDespawn, TweenDespawn, YSort,
 };
 use crate::core::GameState;
 
@@ -29,7 +29,8 @@ impl Plugin for EnemiesPlugin {
             .add_systems(
                 Update,
                 (spawn_enemies, spawn_blahaj, damage_enemies, update_xp_orbs)
-                    .run_if(in_state(GameState::Game)),
+                    .run_if(in_state(GameState::Game))
+                    .run_if(IngameState::Playing),
             );
     }
 }

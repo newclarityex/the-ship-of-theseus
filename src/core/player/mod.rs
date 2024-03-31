@@ -1,5 +1,9 @@
 use bevy::{prelude::*, sprite::Anchor};
 use bevy_rapier2d::prelude::*;
+use bevy_tweening::lens::SpriteColorLens;
+use bevy_tweening::Animator;
+use bevy_tweening::EaseMethod;
+use bevy_tweening::Tween;
 use std::time::Duration;
 
 use crate::core::GameState;
@@ -29,8 +33,10 @@ impl Plugin for PlayerPlugin {
                     handle_player_collisions,
                     handle_xp,
                 )
-                    .run_if(in_state(GameState::Game)),
-            );
+                    .run_if(in_state(GameState::Game))
+                    .run_if(in_state(IngameState::Playing)),
+            )
+            .add_systems(OnEnter(IngameState::GameOver), (handle_dead));
     }
 }
 
@@ -244,4 +250,20 @@ fn handle_player_collisions(
             _ => {}
         }
     }
+}
+
+fn handle_dead(mut commands: Commands, mut player_query: Query<Entity, With<Player>>) {
+    let player_entity = player_query.get_single().unwrap();
+    let fade_tween = Tween::new(
+        EaseMethod::Linear,
+        Duration::from_secs_f32(1.),
+        SpriteColorLens {
+            start: Color::WHITE.with_a(1.),
+            end: Color::WHITE.with_a(0.),
+        },
+    );
+
+    commands
+        .entity(player_entity)
+        .insert(Animator::new(fade_tween));
 }
