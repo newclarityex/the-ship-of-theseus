@@ -1,3 +1,4 @@
+use crate::core::items::behaviors::ContactWeapon;
 use bevy::prelude::*;
 use bevy_tweening::{lens::SpriteColorLens, Animator, EaseMethod, Tween};
 use rand::{
@@ -96,23 +97,23 @@ struct EnemySpawnTables(RangeMap<i32, EnemySpawnTable>);
 impl EnemySpawnTables {
     fn default() -> Self {
         EnemySpawnTables(range_map! {
-            0..30 => EnemySpawnTable {
+            0..60 => EnemySpawnTable {
                 global_rate: 1,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
-            30..60 => EnemySpawnTable {
+            60..120 => EnemySpawnTable {
                 global_rate: 2,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
-            60..120 => EnemySpawnTable {
+            120..180 => EnemySpawnTable {
                 global_rate: 5,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
-            120..300 => EnemySpawnTable {
+            180..240 => EnemySpawnTable {
                 global_rate: 10,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
-            300..i32::MAX=> EnemySpawnTable {
+            240..i32::MAX=> EnemySpawnTable {
                 global_rate: 25,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             }
@@ -199,6 +200,10 @@ fn spawn_blahaj(
 
         commands.spawn((
             Blahaj,
+            ContactWeapon {
+                pierce: -1,
+                damage: 20.,
+            },
             ai::SurroundAI {
                 chase_speed: 75.,
                 surround_speed: 5.,

@@ -13,7 +13,7 @@ use super::{
     IngameTime, Movement,
 };
 
-mod behaviors;
+pub mod behaviors;
 
 pub struct ItemsPlugin;
 
@@ -122,7 +122,7 @@ pub fn trigger_weapons(
                         max_speed: 600.,
                     },
                     HomingBehavior {
-                        acceleration: 5000.,
+                        acceleration: 6000.,
                         collided: HashSet::new(),
                     },
                     SpriteBundle {
