@@ -114,7 +114,7 @@ impl EnemySpawnTables {
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 10}, EnemyRate { enemy_type: EnemyType::Siren, weight: 10}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             240..300=> EnemySpawnTable {
-                global_rate: 10,
+                global_rate: 7,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             300..i32::MAX=> EnemySpawnTable {
