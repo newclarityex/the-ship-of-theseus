@@ -111,11 +111,11 @@ impl EnemySpawnTables {
             },
             180..240 => EnemySpawnTable {
                 global_rate: 5,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             240..300=> EnemySpawnTable {
                 global_rate: 10,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
             300..i32::MAX=> EnemySpawnTable {
                 global_rate: 25,
@@ -323,7 +323,7 @@ fn damage_enemies(
     }
 }
 
-const XP_ATTRACT_RANGE: f32 = 150.;
+const XP_ATTRACT_RANGE: f32 = 300.;
 const XP_COLLECT_RANGE: f32 = 25.;
 fn update_xp_orbs(
     mut commands: Commands,
