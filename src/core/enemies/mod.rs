@@ -13,7 +13,7 @@ use super::{
     player::{Player, XpGained},
     DistanceDespawn, IngameTime, Movement, TimedDespawn, TweenDespawn, YSort,
 };
-use crate::GameState;
+use crate::core::GameState;
 
 mod ai;
 mod spawning;
@@ -104,7 +104,7 @@ impl EnemySpawnTables {
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             60..i32::MAX => EnemySpawnTable {
-                global_rate: 5,
+                global_rate: 2,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 5}, EnemyRate { enemy_type: EnemyType::Siren, weight: 5}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             }
         })

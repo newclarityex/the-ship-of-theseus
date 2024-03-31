@@ -2,8 +2,8 @@ use bevy::{prelude::*, sprite::Anchor};
 use bevy_rapier2d::prelude::*;
 use std::time::Duration;
 
+use crate::core::GameState;
 use crate::core::YSort;
-use crate::GameState;
 
 use super::{
     enemies::{ContactEnemy, EnemyKnockback},

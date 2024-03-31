@@ -6,9 +6,40 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.13.1"
+bevy = { version = "0.13.1", default-features = false, features = [
+    "animation",
+    "bevy_asset",
+    "bevy_gilrs",
+    "bevy_scene",
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "multi-threaded",
+    "png",
+    "hdr",
+    "x11",
+    "bevy_gizmos",
+    "tonemapping_luts",
+    "default_font",
+    "webgl2",
+    "bevy_debug_stepping",
+] }
 bevy_animations_manager = { git = "https://github.com/newclarityex/bevy_animations_manager.git", version = "0.1.0" }
+bevy_kira_audio = { version = "0.19.0", features = ["ogg"] }
 bevy_rapier2d = "0.25.0"
 bevy_tweening = "0.10.0"
 rand = "0.8.5"
 rangemap = "1.5.1"
+
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 3
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3

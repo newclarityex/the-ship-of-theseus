@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::GameState;
+use crate::core::GameState;
 
 use self::behaviors::{ContactWeapon, HomingBehavior, SpearBehavior};
 

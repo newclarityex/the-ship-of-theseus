@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::GameState;
+use crate::core::GameState;
 
 use super::{
     items::{get_item_sprite, Inventory, INVENTORY_SIZE},

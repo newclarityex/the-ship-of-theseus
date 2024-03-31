@@ -1,10 +1,9 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_tweening::TweenCompleted;
 
-use crate::GameState;
-
 use self::player::Player;
 
+mod audio;
 mod effects;
 mod enemies;
 mod environment;
@@ -23,8 +22,10 @@ impl Plugin for CorePlugin {
             items::ItemsPlugin,
             enemies::EnemiesPlugin,
             effects::EffectsPlugin,
+            audio::AudioManagerPlugin,
         ))
         .insert_resource(IngameTime(0.))
+        .insert_state(GameState::StartMenu)
         .add_systems(Startup, setup_camera)
         .add_systems(
             Update,
@@ -54,6 +55,12 @@ impl Plugin for CorePlugin {
     }
 }
 
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
+enum GameState {
+    StartMenu,
+    Game,
+    Finished,
+}
 #[derive(Component)]
 pub struct Movement {
     velocity: Vec2,

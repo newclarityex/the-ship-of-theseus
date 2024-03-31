@@ -1,7 +1,7 @@
 use crate::core::{DistanceDespawn, Movement, YSort};
 
 use super::{
-    ai::{ChaseAI, SirenAI, SurroundAI},
+    ai::{ChaseAI, KrakenAI, SirenAI, SurroundAI},
     ContactEnemy, Enemy, EnemyKnockback, EnemyXp, Health, Targetable,
 };
 use bevy::prelude::*;
@@ -114,7 +114,7 @@ pub fn spawn_siren(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         SurroundAI {
             chase_speed: 150.,
             surround_speed: 2.5,
-            surround_distance: 200.,
+            surround_distance: 250.,
             clockwise: rng.gen_bool(0.5),
         },
         Movement {
@@ -156,7 +156,7 @@ pub fn spawn_kraken(
         Movement {
             velocity: Vec2::ZERO,
             friction: 1.,
-            max_speed: 150.,
+            max_speed: 75.,
         },
         SpriteBundle {
             transform: Transform::from_translation(spawn_position.extend(0.)),
@@ -169,5 +169,8 @@ pub fn spawn_kraken(
         Targetable,
         EnemyXp(50.),
         DistanceDespawn,
+        KrakenAI {
+            timer: Timer::from_seconds(5., TimerMode::Repeating),
+        },
     ));
 }

@@ -2,12 +2,9 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::collections::HashSet;
 
-use crate::{
-    core::{
-        enemies::{ContactEnemy, DamageEvent, Enemy, Health, Targetable},
-        Movement,
-    },
-    GameState,
+use crate::core::{
+    enemies::{ContactEnemy, DamageEvent, Enemy, Health, Targetable},
+    GameState, Movement,
 };
 
 pub struct ProjectileBehaviorsPlugin;

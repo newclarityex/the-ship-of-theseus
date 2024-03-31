@@ -6,13 +6,6 @@ use core::CorePlugin;
 
 mod core;
 
-#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
-enum GameState {
-    StartMenu,
-    Game,
-    Finished,
-}
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
@@ -22,6 +15,5 @@ fn main() {
         .add_plugins(CorePlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugins(RapierDebugRenderPlugin::default())
-        .insert_state(GameState::StartMenu)
         .run();
 }

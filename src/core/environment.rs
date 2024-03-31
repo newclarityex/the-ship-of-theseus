@@ -7,7 +7,7 @@ use rand::{
 use rangemap::{range_map, RangeMap};
 use std::{collections::HashSet, f32::consts::PI};
 
-use crate::GameState;
+use crate::core::GameState;
 
 use super::{
     enemies::{ContactEnemy, Enemy, EnemyKnockback},

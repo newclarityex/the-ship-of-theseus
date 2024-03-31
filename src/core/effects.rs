@@ -6,7 +6,7 @@ use bevy_tweening::{
 use rand::{thread_rng, Rng};
 use std::time::Duration;
 
-use crate::GameState;
+use crate::core::GameState;
 
 use super::{
     enemies::{DamageEvent, Health},
@@ -106,13 +106,12 @@ fn handle_stat_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut ev_stat_increase: EventReader<StatIncrease>,
-    player_query: Query<&Transform, With<Player>>,
+    player_query: Query<(Entity), With<Player>>,
 ) {
-    let player_transform = player_query.get_single().unwrap();
+    let player_entity = player_query.get_single().unwrap();
 
     for event in ev_stat_increase.read() {
-        let mut pos = player_transform.translation.xy().extend(3.);
-        pos.y += 50.;
+        let mut pos = Vec3::new(0., 50., 0.);
 
         let mut rng = thread_rng();
 
@@ -141,25 +140,27 @@ fn handle_stat_events(
             },
         );
 
-        commands.spawn((
-            Text2dBundle {
-                transform: Transform {
-                    translation: pos,
+        commands
+            .spawn((
+                Text2dBundle {
+                    transform: Transform {
+                        translation: pos,
+                        ..default()
+                    },
+                    text: Text::from_section(
+                        event.0.to_string(),
+                        TextStyle {
+                            font: asset_server.load("fonts/pixel_font.ttf"),
+                            font_size: 28.,
+                            color: text_color,
+                        },
+                    ),
                     ..default()
                 },
-                text: Text::from_section(
-                    event.0.to_string(),
-                    TextStyle {
-                        font: asset_server.load("fonts/pixel_font.ttf"),
-                        font_size: 28.,
-                        color: text_color,
-                    },
-                ),
-                ..default()
-            },
-            Animator::new(fade_tween),
-            Animator::new(move_tween),
-            TweenDespawn,
-        ));
+                Animator::new(fade_tween),
+                Animator::new(move_tween),
+                TweenDespawn,
+            ))
+            .set_parent(player_entity);
     }
 }

@@ -2,10 +2,7 @@ use bevy::{prelude::*, transform};
 use bevy_rapier2d::prelude::*;
 use std::f32::consts::PI;
 
-use crate::{
-    core::{player::Player, DistanceDespawn, Movement, TimedDespawn, YSort},
-    GameState,
-};
+use crate::core::{player::Player, DistanceDespawn, GameState, Movement, TimedDespawn, YSort};
 
 use super::ContactEnemy;
 
@@ -19,6 +16,7 @@ impl Plugin for AIPlugin {
                 handle_chase_ai,
                 handle_surround_ai,
                 handle_siren_ai,
+                handle_kraken_ai,
                 update_linear_projectiles,
             )
                 .run_if(in_state(GameState::Game)),
@@ -45,6 +43,10 @@ struct SurroundingAI {
 
 #[derive(Component)]
 pub struct SirenAI {
+    pub timer: Timer,
+}
+#[derive(Component)]
+pub struct KrakenAI {
     pub timer: Timer,
 }
 
@@ -162,33 +164,80 @@ fn handle_siren_ai(
 
         let direction = (player_transform.translation.xy() - siren_transform.translation.xy())
             .normalize_or_zero();
+        let angle = direction.to_angle();
 
         commands.spawn((
             ContactEnemy,
-            LinearProjectile {
-                angle: direction.to_angle(),
-                speed: 100.,
-            },
+            LinearProjectile { angle, speed: 80. },
             SpriteBundle {
                 texture: asset_server.load("sprites/projectiles/siren_attack.png"),
-                transform: Transform::from_translation(siren_transform.translation),
+                transform: Transform {
+                    translation: siren_transform.translation,
+                    rotation: Quat::from_rotation_z(angle),
+                    ..default()
+                },
                 ..default()
             },
             TimedDespawn { delay: 10. },
             DistanceDespawn,
             YSort(0.),
             Sensor,
-            Collider::ball(16.),
+            Collider::ball(14.),
         ));
     }
 }
+
+const KRAKEN_WAVES: i32 = 8;
+fn handle_kraken_ai(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    time: Res<Time>,
+    player_query: Query<&Transform, With<Player>>,
+    mut kraken_query: Query<(&mut KrakenAI, &Transform)>,
+) {
+    let player_transform = player_query.get_single().unwrap();
+
+    for (mut kraken, kraken_transform) in kraken_query.iter_mut() {
+        kraken.timer.tick(time.delta());
+
+        if !kraken.timer.just_finished() {
+            continue;
+        }
+
+        for i in 0..KRAKEN_WAVES {
+            let rotation = (2. * PI / KRAKEN_WAVES as f32) * i as f32;
+
+            commands.spawn((
+                ContactEnemy,
+                LinearProjectile {
+                    angle: rotation,
+                    speed: 100.,
+                },
+                SpriteBundle {
+                    texture: asset_server.load("sprites/projectiles/kraken_wave.png"),
+                    transform: Transform::from_translation(kraken_transform.translation),
+                    sprite: Sprite {
+                        flip_x: Vec2::from_angle(rotation).x < 0.,
+                        ..default()
+                    },
+                    ..default()
+                },
+                TimedDespawn { delay: 10. },
+                DistanceDespawn,
+                YSort(0.),
+                Sensor,
+                Collider::ball(14.),
+            ));
+        }
+    }
+}
+
 fn update_linear_projectiles(
     time: Res<Time>,
     mut projectiles_query: Query<(&mut Transform, &LinearProjectile)>,
 ) {
     for (mut transform, projectile) in projectiles_query.iter_mut() {
         let movement = Vec2::from_angle(projectile.angle) * projectile.speed * time.delta_seconds();
-        transform.rotation = Quat::from_rotation_z(projectile.angle);
         transform.translation.x += movement.x;
         transform.translation.y += movement.y;
     }
