@@ -124,12 +124,22 @@ pub struct InvulnerabilityTimer {
 
 #[derive(Component)]
 pub struct Tutorial;
-fn show_tutorial(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn show_tutorial(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    player_query: Query<&Transform, With<Player>>,
+) {
+    let player_transform = player_query.get_single().unwrap();
+
+    let mut pos = player_transform.translation;
+    pos.z = 5.;
+    pos.y += 150;
+
     commands.spawn((
         Tutorial,
         SpriteBundle {
             texture: asset_server.load("sprites/other/tutorial.png"),
-            transform: Transform::from_xyz(0., 150., 5.),
+            transform: pos,
             ..default()
         },
     ));
