@@ -77,7 +77,7 @@ const BOW_SPRAY: f32 = PI / 6.;
 const SPEAR_COOLDOWN: f32 = 1.;
 const GREEK_FIRE_COOLDOWN: f32 = 1.5;
 const POSEIDON_TRIDENT_COOLDOWN: f32 = 1.25;
-const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 0.5;
+const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 0.75;
 
 pub fn trigger_weapons(
     mut commands: Commands,
@@ -92,17 +92,19 @@ pub fn trigger_weapons(
     let (player_transform, player_leveling) = player_query.get_single().unwrap();
     let player_pos = player_transform.translation.xy();
 
-    let mut nearest_enemy: Option<(Vec2, Entity)> = None;
-    for (enemy_transform, enemy_entity) in enemies_query.iter() {
-        let enemy_pos = enemy_transform.translation.xy();
-        if let Some((existing_enemy_pos, _)) = nearest_enemy {
-            if existing_enemy_pos.distance(player_pos) > enemy_pos.distance(player_pos) {
-                nearest_enemy = Some((enemy_pos, enemy_entity));
-            }
-        } else {
-            nearest_enemy = Some((enemy_pos, enemy_entity));
-        }
-    }
+    let mut nearest_enemies = enemies_query
+        .iter()
+        .map(|(enemy_transform, enemy_entity)| (enemy_transform.translation.xy(), enemy_entity))
+        .collect::<Vec<(Vec2, Entity)>>();
+
+    nearest_enemies.sort_by(|(pos_a, _), (pos_b, _)| {
+        return pos_a
+            .distance(player_pos)
+            .partial_cmp(&pos_b.distance(player_pos))
+            .unwrap();
+    });
+
+    let mut nearest_enemy = nearest_enemies.get(0);
 
     let mut item_count: HashMap<Item, i32> = HashMap::new();
 
@@ -143,7 +145,7 @@ pub fn trigger_weapons(
                     ActiveCollisionTypes::STATIC_STATIC,
                     ActiveEvents::COLLISION_EVENTS,
                     ContactWeapon {
-                        pierce: 2 + player_leveling.pierce,
+                        pierce: 2 + player_leveling.buff,
                         damage: 25. * player_leveling.damage_multiplier,
                     },
                     SpearBehavior {
@@ -182,7 +184,7 @@ pub fn trigger_weapons(
 
                 *last_fired = ingame_time.0;
 
-                for _ in 0..(count * (player_leveling.pierce + 1)) {
+                for _ in 0..(count * (player_leveling.buff + 1)) {
                     let mut throw_angle = (nearest_enemy_pos - player_pos).to_angle();
 
                     let mut rng = thread_rng();
@@ -253,7 +255,7 @@ pub fn trigger_weapons(
                         speed: 1000.,
                     },
                     BombBehavior {
-                        scale: 1. + player_leveling.pierce as f32 / 4.,
+                        scale: 1. + player_leveling.buff as f32 / 4.,
                         damage: 5. * player_leveling.damage_multiplier,
                     },
                     SpriteBundle {
@@ -297,8 +299,8 @@ pub fn trigger_weapons(
                     ActiveCollisionTypes::STATIC_STATIC,
                     ActiveEvents::COLLISION_EVENTS,
                     ContactWeapon {
-                        pierce: 5 + player_leveling.pierce,
-                        damage: 20. * player_leveling.damage_multiplier,
+                        pierce: 5 + player_leveling.buff,
+                        damage: 25. * player_leveling.damage_multiplier,
                     },
                     Movement {
                         velocity: Vec2::ZERO,
@@ -344,39 +346,51 @@ pub fn trigger_weapons(
 
                 *last_fired = ingame_time.0;
 
-                ev_damage.send(DamageEvent {
-                    damage: 100. * player_leveling.damage_multiplier,
-                    entity: nearest_enemy.1,
-                });
+                let mut enemy_iter = nearest_enemies.iter();
 
-                let fade_tween = Tween::new(
-                    EaseMethod::Linear,
-                    Duration::from_secs_f32(1.),
-                    SpriteColorLens {
-                        start: Color::WHITE,
-                        end: Color::BLACK.with_a(0.),
-                    },
-                )
-                .with_completed_event(0);
+                for _ in 0..(count * (player_leveling.buff + 1)) {
+                    let Some(nearest_enemy) = enemy_iter.next() else {
+                        continue;
+                    };
 
-                commands.spawn((
-                    SpriteBundle {
-                        texture: asset_server.load("sprites/projectiles/zeus_thunderbolt.png"),
-                        transform: Transform {
-                            translation: nearest_enemy_pos.extend(0.),
+                    if nearest_enemy.0.distance(player_pos) > ATTACK_RANGE {
+                        continue;
+                    };
+
+                    ev_damage.send(DamageEvent {
+                        damage: 100. * player_leveling.damage_multiplier,
+                        entity: nearest_enemy.1,
+                    });
+
+                    let fade_tween = Tween::new(
+                        EaseMethod::Linear,
+                        Duration::from_secs_f32(1.),
+                        SpriteColorLens {
+                            start: Color::WHITE,
+                            end: Color::BLACK.with_a(0.),
+                        },
+                    )
+                    .with_completed_event(0);
+
+                    commands.spawn((
+                        SpriteBundle {
+                            texture: asset_server.load("sprites/projectiles/zeus_thunderbolt.png"),
+                            transform: Transform {
+                                translation: nearest_enemy.0.extend(0.),
+                                ..default()
+                            },
+                            sprite: Sprite {
+                                anchor: Anchor::BottomCenter,
+                                ..default()
+                            },
                             ..default()
                         },
-                        sprite: Sprite {
-                            anchor: Anchor::BottomCenter,
-                            ..default()
-                        },
-                        ..default()
-                    },
-                    Animator::new(fade_tween),
-                    GameDespawn,
-                    TweenDespawn,
-                    YSort(0.),
-                ));
+                        Animator::new(fade_tween),
+                        GameDespawn,
+                        TweenDespawn,
+                        YSort(0.),
+                    ));
+                }
             }
         }
     }

@@ -58,7 +58,7 @@ pub fn level_required_xp(level: u32) -> f32 {
 pub struct Leveling {
     pub level: u32,
     pub xp: f32,
-    pub pierce: i32,
+    pub buff: i32,
     pub damage_multiplier: f32,
     pub rate_multiplier: f32,
 }
@@ -68,14 +68,14 @@ impl Leveling {
         Leveling {
             level: 1,
             xp: 0.,
-            pierce: 0,
+            buff: 0,
             damage_multiplier: 1.0,
             rate_multiplier: 1.0,
         }
     }
 }
 
-const PIERCE_LEVELS: u32 = 10;
+const BUFF_LEVELS: u32 = 10;
 const RATE_LEVELS: u32 = 5;
 const DAMAGE_LEVELS: u32 = 1;
 
@@ -98,8 +98,8 @@ fn handle_xp(
             leveling.xp -= required_xp;
 
             ev_level_up.send(LevelUp(leveling.level));
-            if leveling.level % PIERCE_LEVELS == 0 {
-                leveling.pierce += 1;
+            if leveling.level % BUFF_LEVELS == 0 {
+                leveling.buff += 1;
                 ev_stat_increase.send(StatIncrease("BUFF++".into()));
             } else if leveling.level % RATE_LEVELS == 0 {
                 leveling.rate_multiplier += 0.1;
