@@ -314,7 +314,7 @@ fn setup_start_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .with_children(|parent| {
                     parent
                         .spawn(NodeBundle {
-                            background_color: Color::rgba(1., 1., 1., 0.7).into(),
+                            background_color: Color::rgba(1., 1., 1., 0.5).into(),
                             ..default()
                         })
                         .with_children(|parent| {
@@ -342,7 +342,7 @@ fn setup_start_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         });
                     parent
                         .spawn(NodeBundle {
-                            background_color: Color::rgba(1., 1., 1., 0.7).into(),
+                            background_color: Color::rgba(1., 1., 1., 0.5).into(),
                             ..default()
                         })
                         .with_children(|parent| {
@@ -410,7 +410,7 @@ fn setup_stats_menu(
         .with_children(|parent| {
             parent
                 .spawn((NodeBundle {
-                    background_color: Color::rgba(1., 1., 1., 0.7).into(),
+                    background_color: Color::rgba(1., 1., 1., 0.5).into(),
                     ..default()
                 },))
                 .with_children(|parent| {
@@ -605,7 +605,7 @@ fn setup_pause_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_children(|parent| {
             parent
                 .spawn(NodeBundle {
-                    background_color: Color::rgba(1., 1., 1., 0.7).into(),
+                    background_color: Color::rgba(1., 1., 1., 0.5).into(),
                     ..default()
                 })
                 .with_children(|parent| {
