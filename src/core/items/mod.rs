@@ -72,7 +72,7 @@ pub fn get_item_sprite(item: &Item) -> &'static str {
 }
 
 const ATTACK_RANGE: f32 = 400.;
-const BOW_COOLDOWN: f32 = 0.1;
+const BOW_COOLDOWN: f32 = 0.15;
 const BOW_SPRAY: f32 = PI / 6.;
 const SPEAR_COOLDOWN: f32 = 1.;
 const GREEK_FIRE_COOLDOWN: f32 = 1.5;
