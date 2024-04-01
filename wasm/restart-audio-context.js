@@ -27,8 +27,14 @@
         },
     });
 
-    // To resume all AudioContexts being tracked
-    function resumeAllContexts(event) {
+    function delayedResume() {
+        setTimeout(() => {
+            resumeAllContexts()
+        }, 0);
+    }
+
+    // To resume all AudioContexts being tracked, apply delay for annoying frame issue
+    async function resumeAllContexts() {
         let count = 0;
 
         audioContextList.forEach(context => {
@@ -44,7 +50,7 @@
         // unnecessary resume attempts
         if (count == audioContextList.length) {
             userInputEventNames.forEach(eventName => {
-                document.removeEventListener(eventName, resumeAllContexts);
+                document.removeEventListener(eventName, delayedResume);
             });
         }
     }
@@ -52,6 +58,6 @@
     // We bind the resume function for each user interaction
     // event on the page
     userInputEventNames.forEach(eventName => {
-        document.addEventListener(eventName, resumeAllContexts);
+        document.addEventListener(eventName, delayedResume);
     });
 })();
