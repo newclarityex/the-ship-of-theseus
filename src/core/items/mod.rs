@@ -35,7 +35,7 @@ pub struct Inventory(pub VecDeque<Item>);
 
 impl Inventory {
     fn default() -> Self {
-        Inventory(vec![Item::Spear].into())
+        Inventory(vec![Item::Bow].into())
     }
 }
 
@@ -70,7 +70,7 @@ pub fn get_item_sprite(item: &Item) -> &'static str {
 }
 
 const ATTACK_RANGE: f32 = 400.;
-const BOW_COOLDOWN: f32 = 0.25;
+const BOW_COOLDOWN: f32 = 0.15;
 const SPEAR_COOLDOWN: f32 = 1.;
 const GREEK_FIRE_COOLDOWN: f32 = 1.5;
 const POSEIDON_TRIDENT_COOLDOWN: f32 = 1.25;
