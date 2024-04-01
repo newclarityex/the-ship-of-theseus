@@ -1,5 +1,8 @@
 name: Release
 
+on:
+  - push
+
 env:
   # update with the name of the main binary
   binary: the-ship-of-theseus
