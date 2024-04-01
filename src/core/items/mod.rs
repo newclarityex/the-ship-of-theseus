@@ -352,7 +352,7 @@ pub fn trigger_weapons(
 
                 let fade_tween = Tween::new(
                     EaseMethod::Linear,
-                    Duration::from_secs_f32(3.),
+                    Duration::from_secs_f32(1.),
                     SpriteColorLens {
                         start: Color::WHITE,
                         end: Color::BLACK.with_a(0.),
