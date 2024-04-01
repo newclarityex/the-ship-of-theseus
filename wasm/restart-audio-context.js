@@ -4,7 +4,7 @@
     const audioContextList = [];
 
     setInterval(() => {
-        audioContextList = audioContextList.filter(context => context.state === 'running');
+        audioContextList = audioContextList.filter(context => context.state !== 'running');
         audioContextList.forEach(context => {
             context.resume();
         });
