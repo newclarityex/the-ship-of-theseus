@@ -326,7 +326,6 @@ fn damage_enemies(
 
         enemy_health.health -= event.damage;
 
-        sfx_channel.stop();
         let asset_handle = asset_server.load("audio/sfx/hit.wav");
         sfx_channel.play(asset_handle);
 
@@ -431,7 +430,6 @@ fn update_xp_orbs(
         xp_orb_movement.velocity += direction * 1000. * time.delta_seconds();
 
         if distance < XP_COLLECT_RANGE {
-            sfx_channel.stop();
             let asset_handle = asset_server.load("audio/sfx/collect.wav");
             sfx_channel.play(asset_handle);
             ev_xp_gain.send(XpGained(xp_orb.0));
