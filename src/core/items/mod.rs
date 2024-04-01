@@ -247,7 +247,7 @@ pub fn trigger_weapons(
                         speed: 1000.,
                     },
                     BombBehavior {
-                        lifetime: 2. + player_leveling.pierce as f32,
+                        scale: 1. + player_leveling.pierce as f32 / 2,
                         damage: 5. * player_leveling.damage_multiplier,
                     },
                     SpriteBundle {

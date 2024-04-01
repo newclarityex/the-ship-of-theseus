@@ -42,7 +42,7 @@ pub struct SpearBehavior {
 #[derive(Component)]
 pub struct BombBehavior {
     pub damage: f32,
-    pub lifetime: f32,
+    pub scale: f32,
 }
 
 #[derive(Component)]
@@ -185,7 +185,7 @@ fn handle_weapon_collisions(
                             ActiveCollisionTypes::STATIC_STATIC,
                             ActiveEvents::COLLISION_EVENTS,
                             FireBehavior {
-                                lifetime: bomb_behavior.lifetime,
+                                lifetime: 3.,
                                 damage: bomb_behavior.damage,
                                 contact: HashSet::new(),
                                 timer: Timer::from_seconds(0.5, TimerMode::Repeating),
@@ -194,6 +194,7 @@ fn handle_weapon_collisions(
                                 texture: asset_server.load("sprites/projectiles/greek_fire.png"),
                                 transform: Transform {
                                     translation: enemy_transform.translation,
+                                    scale: bomb_behavior.scale..default(),
                                     ..default()
                                 },
                                 ..default()
