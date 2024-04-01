@@ -257,7 +257,7 @@ pub fn spawn_wyvern(
         EnemyXp(50.),
         DistanceDespawn,
         RangedAI {
-            timer: Timer::from_seconds(1.5, TimerMode::Repeating),
+            timer: Timer::from_seconds(3., TimerMode::Repeating),
             ammo: EnemyAmmo::Wyvern,
         },
         GameDespawn,

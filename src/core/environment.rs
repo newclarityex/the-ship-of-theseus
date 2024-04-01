@@ -230,6 +230,7 @@ fn update_tile_chunks(
 
     for (entity, chunk) in tile_chunks_query.iter() {
         if !chunks_needed.contains(&chunk.pos) {
+            current_tile_chunks.0.remove(&chunk.pos);
             commands.entity(entity).despawn_recursive();
         }
     }
@@ -332,6 +333,7 @@ fn update_entity_chunks(
 
     for (entity, chunk) in entity_chunks_query.iter() {
         if !chunks_needed.contains(&chunk.pos) {
+            current_entity_chunks.0.remove(&chunk.pos);
             commands.entity(entity).despawn_recursive();
         }
     }
