@@ -16,7 +16,7 @@ use self::behaviors::{BombBehavior, ContactWeapon, HomingBehavior, HomingRotatio
 use super::{
     enemies::{DamageEvent, Enemy, Targetable},
     player::{Leveling, Player},
-    GameDespawn, IngameTime, Movement, TweenDespawn, YSort,
+    GameDespawn, IngameTime, Movement, TimedDespawn, TweenDespawn, YSort,
 };
 
 pub mod behaviors;
@@ -163,6 +163,7 @@ pub fn trigger_weapons(
                     },
                     GameDespawn,
                     YSort(0.),
+                    TimedDespawn { delay: 10. },
                 ));
             }
             Item::Bow => {
@@ -215,6 +216,7 @@ pub fn trigger_weapons(
                         },
                         GameDespawn,
                         YSort(0.),
+                        TimedDespawn { delay: 10. },
                     ));
                 }
             }
@@ -268,6 +270,7 @@ pub fn trigger_weapons(
                     },
                     YSort(0.),
                     GameDespawn,
+                    TimedDespawn { delay: 10. },
                 ));
             }
             Item::PoseidonTrident => {
