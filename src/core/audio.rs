@@ -22,7 +22,7 @@ impl Plugin for AudioManagerPlugin {
             .add_audio_channel::<MusicChannel>()
             .insert_resource(MusicVolume(0.25))
             .add_audio_channel::<SFXChannel>()
-            .insert_resource(SFXVolume(0.1))
+            .insert_resource(SFXVolume(0.075))
             .add_systems(OnEnter(GameState::StartMenu), start_menu_music)
             // .add_systems(OnExit(GameState::StartMenu), stop_menu_music)
             .add_systems(OnEnter(GameState::Game), start_game_music)

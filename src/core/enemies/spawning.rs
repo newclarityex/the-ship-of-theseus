@@ -273,8 +273,8 @@ pub fn spawn_kraken(
         (Collider::ball(16.0), Sensor, ActiveEvents::COLLISION_EVENTS),
         Enemy,
         Health {
-            health: 2500.,
-            max_health: 2500.,
+            health: 1000.,
+            max_health: 1000.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
