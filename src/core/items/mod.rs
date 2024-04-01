@@ -59,7 +59,7 @@ impl Plugin for ItemsPlugin {
     }
 }
 
-pub const INVENTORY_SIZE: usize = 3;
+pub const INVENTORY_SIZE: usize = 10;
 
 pub fn get_item_sprite(item: &Item) -> &'static str {
     match item {
