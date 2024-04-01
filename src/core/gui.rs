@@ -548,7 +548,7 @@ fn setup_stats_menu(
                                         });
                                         parent.spawn(TextBundle {
                                             text: Text::from_section(
-                                                "Maybe",
+                                                "Maybe...",
                                                 TextStyle {
                                                     font: asset_server.load("fonts/pixel_font.ttf"),
                                                     font_size: 28.,
