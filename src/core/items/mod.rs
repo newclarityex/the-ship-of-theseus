@@ -163,7 +163,7 @@ pub fn trigger_weapons(
                     },
                     GameDespawn,
                     YSort(0.),
-                    TimedDespawn { delay: 10. },
+                    TimedDespawn { delay: 3. },
                 ));
             }
             Item::Bow => {
@@ -216,7 +216,7 @@ pub fn trigger_weapons(
                         },
                         GameDespawn,
                         YSort(0.),
-                        TimedDespawn { delay: 10. },
+                        TimedDespawn { delay: 3. },
                     ));
                 }
             }
@@ -270,7 +270,7 @@ pub fn trigger_weapons(
                     },
                     YSort(0.),
                     GameDespawn,
-                    TimedDespawn { delay: 10. },
+                    TimedDespawn { delay: 3. },
                 ));
             }
             Item::PoseidonTrident => {

@@ -94,10 +94,10 @@ impl ItemSpawnTables {
                 item_rates: vec![ItemRate { item_type: Item::Spear, weight: 2 }, ItemRate { item_type: Item::Bow, weight: 2 }, ItemRate { item_type: Item::GreekFire, weight: 2 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
             240..300 => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::Bow, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 2 }, ItemRate { item_type: Item::PoseidonTrident, weight: 2 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 2 }],
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::Bow, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
             300..i32::MAX => ItemSpawnTable {
-                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::Bow, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 5 }, ItemRate { item_type: Item::PoseidonTrident, weight: 5 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 5 }],
+                item_rates: vec![ItemRate { item_type: Item::Spear, weight: 1 }, ItemRate { item_type: Item::Bow, weight: 1 }, ItemRate { item_type: Item::GreekFire, weight: 1 }, ItemRate { item_type: Item::PoseidonTrident, weight: 1 }, ItemRate { item_type: Item::ZeusThunderbolt, weight: 1 }],
             },
         })
     }
