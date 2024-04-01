@@ -11,7 +11,7 @@ use rand::{thread_rng, Rng};
 
 use crate::core::{GameState, PauseState};
 
-use self::behaviors::{BombBehavior, ContactWeapon, HomingBehavior, SpearBehavior};
+use self::behaviors::{BombBehavior, ContactWeapon, HomingBehavior, HomingRotation, SpearBehavior};
 
 use super::{
     enemies::{DamageEvent, Enemy, Targetable},
@@ -310,6 +310,7 @@ pub fn trigger_weapons(
                         acceleration: 6000.,
                         collided: HashSet::new(),
                     },
+                    HomingRotation,
                     SpriteBundle {
                         texture: asset_server.load("sprites/projectiles/poseidon_trident.png"),
                         transform: Transform {

@@ -105,15 +105,36 @@ pub struct HomingBehavior {
     pub collided: HashSet<Entity>,
 }
 
+#[derive(Component)]
+pub struct HomingRotation;
+
+#[derive(Component)]
+pub struct HomingFlip;
+
 fn handle_homing(
     time: Res<Time>,
-    mut homing_query: Query<(&mut Movement, &mut Transform, &HomingBehavior)>,
+    mut homing_query: Query<(
+        &mut Movement,
+        &mut Transform,
+        &HomingBehavior,
+        &mut Sprite,
+        Option<&HomingRotation>,
+        Option<&HomingFlip>,
+    )>,
     enemies_query: Query<
         (&Transform, Entity),
         (With<Enemy>, With<Targetable>, Without<HomingBehavior>),
     >,
 ) {
-    for (mut homing_movement, mut homing_transform, homing) in homing_query.iter_mut() {
+    for (
+        mut homing_movement,
+        mut homing_transform,
+        homing,
+        mut homing_sprite,
+        homing_rotation,
+        homing_flip,
+    ) in homing_query.iter_mut()
+    {
         let pos = homing_transform.translation.xy();
 
         let mut nearest_enemy_pos: Option<Vec2> = None;
@@ -137,7 +158,17 @@ fn handle_homing(
 
         let direction = (nearest_enemy_pos - pos).normalize_or_zero();
 
-        homing_transform.rotation = Quat::from_rotation_z(direction.to_angle());
+        if let Some(homing_rotation) = homing_rotation {
+            homing_transform.rotation = Quat::from_rotation_z(direction.to_angle());
+        };
+
+        if let Some(homing_flip) = homing_flip {
+            if direction.x < 0. {
+                homing_sprite.flip_x = true;
+            } else if direction.x > 0. {
+                homing_sprite.flip_x = false;
+            }
+        };
 
         homing_movement.velocity += direction * homing.acceleration * time.delta_seconds();
     }

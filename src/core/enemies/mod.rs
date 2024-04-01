@@ -14,7 +14,7 @@ use self::ai::{AIPlugin, ChaseAI, KrakenAI, SurroundAI};
 
 use super::{
     audio::SFXChannel,
-    items::behaviors::HomingBehavior,
+    items::behaviors::{HomingBehavior, HomingFlip},
     player::{Player, XpGained},
     DistanceDespawn, GameDespawn, GameStats, IngameTime, Movement, TimedDespawn, TweenDespawn,
     YSort,
@@ -63,6 +63,7 @@ pub struct DamageEvent {
 const SPAWN_DISTANCE: f32 = 800.;
 const ENTITY_LIMIT: usize = 2500;
 const BLAHAJ_SPAWN_CHANCE: f32 = 0.005;
+// const BLAHAJ_SPAWN_CHANCE: f32 = 1.;
 
 #[derive(PartialEq, Eq, Clone)]
 enum EnemyType {
@@ -272,12 +273,6 @@ fn spawn_blahaj(
                 damage: 20.,
             },
             ActiveCollisionTypes::STATIC_STATIC,
-            ai::SurroundAI {
-                chase_speed: 75.,
-                surround_speed: 5.,
-                surround_distance: 125.,
-                clockwise: true,
-            },
             SpriteBundle {
                 transform: Transform::from_translation(spawn_position.extend(0.)),
                 texture: asset_server.load("sprites/other/blahaj.png"),
@@ -288,12 +283,13 @@ fn spawn_blahaj(
             Movement {
                 velocity: Vec2::ZERO,
                 friction: 1.,
-                max_speed: 300.,
+                max_speed: 200.,
             },
             HomingBehavior {
-                acceleration: 300.,
+                acceleration: 500.,
                 collided: HashSet::new(),
             },
+            HomingFlip,
         ));
     }
 }
