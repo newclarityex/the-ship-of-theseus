@@ -30,7 +30,7 @@
     function delayedResume() {
         setTimeout(() => {
             resumeAllContexts()
-        }, 0);
+        }, 50);
     }
 
     // To resume all AudioContexts being tracked, apply delay for annoying frame issue
