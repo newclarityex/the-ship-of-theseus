@@ -100,7 +100,7 @@ fn handle_xp(
             ev_level_up.send(LevelUp(leveling.level));
             if leveling.level % PIERCE_LEVELS == 0 {
                 leveling.pierce += 1;
-                ev_stat_increase.send(StatIncrease("PEN++".into()));
+                ev_stat_increase.send(StatIncrease("BUFF++".into()));
             } else if leveling.level % RATE_LEVELS == 0 {
                 leveling.rate_multiplier += 0.1;
                 ev_stat_increase.send(StatIncrease("SPD++".into()));
@@ -128,7 +128,12 @@ fn show_tutorial(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     player_query: Query<&Transform, With<Player>>,
+    tutorial_query: Query<Entity, With<Tutorial>>,
 ) {
+    for tutorial in tutorial_query.iter() {
+        commands.entity(tutorial).despawn_recursive();
+    }
+
     let player_transform = player_query.get_single().unwrap();
 
     let mut pos = player_transform.translation;

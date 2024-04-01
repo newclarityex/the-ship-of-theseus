@@ -37,7 +37,7 @@ pub struct Inventory(pub VecDeque<Item>);
 
 impl Inventory {
     fn default() -> Self {
-        Inventory(vec![Item::Bow].into())
+        Inventory(vec![Item::Spear].into())
     }
 }
 
@@ -82,7 +82,6 @@ const ZEUS_THUNDERBOLT_COOLDOWN: f32 = 0.5;
 pub fn trigger_weapons(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    time: Res<Time>,
     ingame_time: Res<IngameTime>,
     inventory: Res<Inventory>,
     mut item_cooldowns: ResMut<ItemCooldowns>,
@@ -177,45 +176,45 @@ pub fn trigger_weapons(
 
                 let last_fired = item_cooldowns.0.entry(item).or_insert(0.);
 
-                if ingame_time.0 - *last_fired
-                    < BOW_COOLDOWN / count as f32 / player_leveling.rate_multiplier
-                {
+                if ingame_time.0 - *last_fired < BOW_COOLDOWN / player_leveling.rate_multiplier {
                     continue;
                 };
 
                 *last_fired = ingame_time.0;
 
-                let mut throw_angle = (nearest_enemy_pos - player_pos).to_angle();
+                for _ in 0..(count * (player_leveling.pierce + 1)) {
+                    let mut throw_angle = (nearest_enemy_pos - player_pos).to_angle();
 
-                let mut rng = thread_rng();
+                    let mut rng = thread_rng();
 
-                throw_angle += rng.gen_range((-1. * BOW_SPRAY)..BOW_SPRAY) / 2.;
+                    throw_angle += rng.gen_range((-1. * BOW_SPRAY)..BOW_SPRAY) / 2.;
 
-                commands.spawn((
-                    Collider::cuboid(32.0, 1.0),
-                    Sensor,
-                    ActiveCollisionTypes::STATIC_STATIC,
-                    ActiveEvents::COLLISION_EVENTS,
-                    ContactWeapon {
-                        pierce: 0 + player_leveling.pierce,
-                        damage: 5. * player_leveling.damage_multiplier,
-                    },
-                    SpearBehavior {
-                        angle: throw_angle,
-                        speed: 1500.,
-                    },
-                    SpriteBundle {
-                        texture: asset_server.load("sprites/projectiles/arrow.png"),
-                        transform: Transform {
-                            translation: player_pos.extend(0.),
-                            rotation: Quat::from_rotation_z(throw_angle),
+                    commands.spawn((
+                        Collider::cuboid(32.0, 1.0),
+                        Sensor,
+                        ActiveCollisionTypes::STATIC_STATIC,
+                        ActiveEvents::COLLISION_EVENTS,
+                        ContactWeapon {
+                            pierce: 0,
+                            damage: 5. * player_leveling.damage_multiplier,
+                        },
+                        SpearBehavior {
+                            angle: throw_angle,
+                            speed: 1250.,
+                        },
+                        SpriteBundle {
+                            texture: asset_server.load("sprites/projectiles/arrow.png"),
+                            transform: Transform {
+                                translation: player_pos.extend(0.),
+                                rotation: Quat::from_rotation_z(throw_angle),
+                                ..default()
+                            },
                             ..default()
                         },
-                        ..default()
-                    },
-                    GameDespawn,
-                    YSort(0.),
-                ));
+                        GameDespawn,
+                        YSort(0.),
+                    ));
+                }
             }
             Item::GreekFire => {
                 let Some(nearest_enemy) = nearest_enemy else {
@@ -299,7 +298,7 @@ pub fn trigger_weapons(
                     ActiveEvents::COLLISION_EVENTS,
                     ContactWeapon {
                         pierce: 5 + player_leveling.pierce,
-                        damage: 15. * player_leveling.damage_multiplier,
+                        damage: 20. * player_leveling.damage_multiplier,
                     },
                     Movement {
                         velocity: Vec2::ZERO,

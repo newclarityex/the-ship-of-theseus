@@ -13,7 +13,7 @@ use std::{collections::HashSet, f32::consts::PI, time::Duration};
 use self::ai::{AIPlugin, ChaseAI, KrakenAI, SurroundAI};
 
 use super::{
-    audio::SFXChannel,
+    audio::{play_sfx, SFXChannel, SFXQueue},
     items::behaviors::{HomingBehavior, HomingFlip},
     player::{Player, XpGained},
     DistanceDespawn, GameDespawn, GameStats, IngameTime, Movement, TimedDespawn, TweenDespawn,
@@ -322,6 +322,7 @@ const BIG_ORB: f32 = 10.;
 
 fn damage_enemies(
     mut commands: Commands,
+    time: Res<Time>,
     asset_server: Res<AssetServer>,
     mut ev_damage: EventReader<DamageEvent>,
     mut enemy_query: Query<
@@ -336,6 +337,7 @@ fn damage_enemies(
     >,
     mut game_stats: ResMut<GameStats>,
     sfx_channel: Res<AudioChannel<SFXChannel>>,
+    mut sfx_queue: ResMut<SFXQueue>,
 ) {
     for event in ev_damage.read() {
         let Ok((enemy_entity, mut enemy_health, enemy_xp, enemy_transform, enemy_movement)) =
@@ -347,7 +349,13 @@ fn damage_enemies(
         enemy_health.health -= event.damage;
 
         let asset_handle = asset_server.load("audio/sfx/hit.wav");
-        sfx_channel.play(asset_handle);
+        play_sfx(
+            1,
+            time.elapsed_seconds(),
+            asset_handle,
+            &sfx_channel,
+            &mut sfx_queue,
+        );
 
         if let Some(mut enemy_movement) = enemy_movement {
             enemy_movement.velocity = Vec2::ZERO;
@@ -437,6 +445,7 @@ fn update_xp_orbs(
     mut ev_xp_gain: EventWriter<XpGained>,
     sfx_channel: Res<AudioChannel<SFXChannel>>,
     asset_server: Res<AssetServer>,
+    mut sfx_queue: ResMut<SFXQueue>,
 ) {
     let player_transform = player_query.get_single().unwrap();
     for (mut xp_orb_movement, xp_orb_transform, xp_orb, xp_orb_entity) in xp_orb_query.iter_mut() {
@@ -451,7 +460,13 @@ fn update_xp_orbs(
 
         if distance < XP_COLLECT_RANGE {
             let asset_handle = asset_server.load("audio/sfx/collect.wav");
-            sfx_channel.play(asset_handle);
+            play_sfx(
+                1,
+                time.elapsed_seconds(),
+                asset_handle,
+                &sfx_channel,
+                &mut sfx_queue,
+            );
             ev_xp_gain.send(XpGained(xp_orb.0));
             commands.entity(xp_orb_entity).despawn_recursive();
         }
