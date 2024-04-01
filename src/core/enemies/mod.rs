@@ -10,7 +10,7 @@ use rand::{
 use rangemap::{range_map, RangeMap};
 use std::{collections::HashSet, f32::consts::PI, time::Duration};
 
-use self::ai::{AIPlugin, ChaseAI, KrakenAI, SurroundAI};
+use self::ai::{AIPlugin, ChaseAI, KrakenAI, RangedAI, SurroundAI};
 
 use super::{
     audio::{play_sfx, SFXChannel, SFXQueue},
@@ -187,8 +187,28 @@ impl EnemySpawnTables {
                 global_rate: 1000,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
-            1200..i32::MAX=> EnemySpawnTable {
+            1200..1260=> EnemySpawnTable {
+                global_rate: 1250,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            1260..1320=> EnemySpawnTable  {
                 global_rate: 1500,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            1320..1380=> EnemySpawnTable  {
+                global_rate: 1750,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            1380..1440=> EnemySpawnTable  {
+                global_rate: 2000,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            1440..1600=> EnemySpawnTable  {
+                global_rate: 2250,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
+            },
+            1600..i32::MAX=> EnemySpawnTable  {
+                global_rate: 2500,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 3}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 2}, EnemyRate { enemy_type: EnemyType::Kraken, weight: 1}],
             },
         })
@@ -383,6 +403,7 @@ fn damage_enemies(
                 .remove::<SurroundAI>()
                 .remove::<ChaseAI>()
                 .remove::<KrakenAI>()
+                .remove::<RangedAI>()
                 .insert((Animator::new(tween), TweenDespawn));
 
             let big_xp = (enemy_xp.0 / BIG_ORB) as i32;

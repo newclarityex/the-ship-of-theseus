@@ -141,7 +141,7 @@ pub fn spawn_siren(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         EnemyXp(10.),
         DistanceDespawn,
         RangedAI {
-            timer: Timer::from_seconds(3., TimerMode::Repeating),
+            timer: Timer::from_seconds(1.5, TimerMode::Repeating),
             ammo: EnemyAmmo::Siren,
         },
         GameDespawn,
@@ -232,8 +232,8 @@ pub fn spawn_wyvern(
         ),
         Enemy,
         Health {
-            health: 100.,
-            max_health: 100.,
+            health: 150.,
+            max_health: 150.,
         },
         SurroundAI {
             chase_speed: 150.,
@@ -257,7 +257,7 @@ pub fn spawn_wyvern(
         EnemyXp(50.),
         DistanceDespawn,
         RangedAI {
-            timer: Timer::from_seconds(3., TimerMode::Repeating),
+            timer: Timer::from_seconds(1.5, TimerMode::Repeating),
             ammo: EnemyAmmo::Wyvern,
         },
         GameDespawn,
