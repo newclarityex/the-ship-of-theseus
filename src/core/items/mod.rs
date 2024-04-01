@@ -292,7 +292,7 @@ pub fn trigger_weapons(
                     ActiveEvents::COLLISION_EVENTS,
                     ContactWeapon {
                         pierce: 5 + player_leveling.pierce,
-                        damage: 25. * player_leveling.damage_multiplier,
+                        damage: 15. * player_leveling.damage_multiplier,
                     },
                     Movement {
                         velocity: Vec2::ZERO,

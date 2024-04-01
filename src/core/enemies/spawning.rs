@@ -194,8 +194,8 @@ pub fn spawn_hydra(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         ),
         Enemy,
         Health {
-            health: 500.,
-            max_health: 500.,
+            health: 250.,
+            max_health: 250.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
@@ -232,8 +232,8 @@ pub fn spawn_wyvern(
         ),
         Enemy,
         Health {
-            health: 300.,
-            max_health: 300.,
+            health: 150.,
+            max_health: 150.,
         },
         SurroundAI {
             chase_speed: 150.,

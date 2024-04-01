@@ -78,8 +78,8 @@ fn setup_items_gui(mut commands: Commands, mut item_sprites: ResMut<ItemSprites>
                                     border: UiRect::all(Val::Px(2.)),
                                     ..default()
                                 },
-                                border_color: Color::rgb(0.2, 0.2, 0.2).into(),
-                                background_color: Color::rgb(0.35, 0.35, 0.35).into(),
+                                border_color: Color::rgba(1., 1., 1., 0.8).into(),
+                                background_color: Color::rgba(1., 1., 1., 0.25).into(),
                                 ..default()
                             },))
                             .with_children(|parent| {
