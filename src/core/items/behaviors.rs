@@ -194,7 +194,7 @@ fn handle_weapon_collisions(
                                 texture: asset_server.load("sprites/projectiles/greek_fire.png"),
                                 transform: Transform {
                                     translation: enemy_transform.translation,
-                                    scale: bomb_behavior.scale..default(),
+                                    scale: Vec3::splat(bomb_behavior.scale),
                                     ..default()
                                 },
                                 ..default()
