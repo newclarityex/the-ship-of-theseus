@@ -94,7 +94,6 @@ fn handle_fire(
 fn handle_spear(time: Res<Time>, mut spear_query: Query<(&mut Transform, &SpearBehavior)>) {
     for (mut spear_transform, spear) in spear_query.iter_mut() {
         let movement = Vec2::from_angle(spear.angle) * spear.speed * time.delta_seconds();
-        spear_transform.rotation = Quat::from_rotation_z(spear.angle);
         spear_transform.translation.x += movement.x;
         spear_transform.translation.y += movement.y;
     }
