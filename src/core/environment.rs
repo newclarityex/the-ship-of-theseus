@@ -104,7 +104,7 @@ impl ItemSpawnTables {
 }
 
 // Per Chunk
-const ITEM_RATE: f32 = 0.7;
+const ITEM_RATE: f32 = 0.5;
 
 // Per Chunk
 const ROCK_RATE: f32 = 0.8;

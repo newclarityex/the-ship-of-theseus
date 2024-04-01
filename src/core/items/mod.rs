@@ -1,11 +1,13 @@
 use std::{
     collections::{HashMap, HashSet, VecDeque},
+    f32::consts::PI,
     time::Duration,
 };
 
 use bevy::{prelude::*, sprite::Anchor};
 use bevy_rapier2d::prelude::*;
 use bevy_tweening::{lens::SpriteColorLens, Animator, EaseMethod, Tween};
+use rand::{thread_rng, Rng};
 
 use crate::core::{GameState, PauseState};
 
@@ -70,7 +72,8 @@ pub fn get_item_sprite(item: &Item) -> &'static str {
 }
 
 const ATTACK_RANGE: f32 = 400.;
-const BOW_COOLDOWN: f32 = 0.15;
+const BOW_COOLDOWN: f32 = 0.1;
+const BOW_SPRAY: f32 = PI / 6.;
 const SPEAR_COOLDOWN: f32 = 1.;
 const GREEK_FIRE_COOLDOWN: f32 = 1.5;
 const POSEIDON_TRIDENT_COOLDOWN: f32 = 1.25;
@@ -182,7 +185,11 @@ pub fn trigger_weapons(
 
                 *last_fired = ingame_time.0;
 
-                let throw_angle = (nearest_enemy_pos - player_pos).to_angle();
+                let mut throw_angle = (nearest_enemy_pos - player_pos).to_angle();
+
+                let mut rng = thread_rng();
+
+                throw_angle += rng.gen_range((-1. * BOW_SPRAY)..BOW_SPRAY) / 2.;
 
                 commands.spawn((
                     Collider::cuboid(32.0, 1.0),
@@ -247,7 +254,7 @@ pub fn trigger_weapons(
                         speed: 1000.,
                     },
                     BombBehavior {
-                        scale: 1. + player_leveling.pierce as f32 / 2.,
+                        scale: 1. + player_leveling.pierce as f32 / 4.,
                         damage: 5. * player_leveling.damage_multiplier,
                     },
                     SpriteBundle {
