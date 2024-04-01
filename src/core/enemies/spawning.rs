@@ -161,8 +161,8 @@ pub fn spawn_elite_serpent(
         ),
         Enemy,
         Health {
-            health: 100.,
-            max_health: 100.,
+            health: 125.,
+            max_health: 125.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
@@ -194,8 +194,8 @@ pub fn spawn_hydra(commands: &mut Commands, asset_server: &Res<AssetServer>, spa
         ),
         Enemy,
         Health {
-            health: 250.,
-            max_health: 250.,
+            health: 200.,
+            max_health: 200.,
         },
         ChaseAI { acceleration: 75. },
         Movement {
@@ -232,8 +232,8 @@ pub fn spawn_wyvern(
         ),
         Enemy,
         Health {
-            health: 150.,
-            max_health: 150.,
+            health: 100.,
+            max_health: 100.,
         },
         SurroundAI {
             chase_speed: 150.,
