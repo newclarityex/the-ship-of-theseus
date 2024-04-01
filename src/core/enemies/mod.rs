@@ -108,23 +108,23 @@ impl EnemySpawnTables {
     fn default() -> Self {
         EnemySpawnTables(range_map! {
             0..60 => EnemySpawnTable {
-                global_rate: 250,
+                global_rate: 150,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             60..120 => EnemySpawnTable {
-                global_rate: 300,
+                global_rate: 200,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             120..180 => EnemySpawnTable {
-                global_rate: 400,
+                global_rate: 250,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 1}],
             },
             180..240 => EnemySpawnTable {
-                global_rate: 500,
+                global_rate: 350,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 1}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
             240..300=> EnemySpawnTable {
-                global_rate: 600,
+                global_rate: 500,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 4}, EnemyRate { enemy_type: EnemyType::Hydra, weight: 1}, EnemyRate { enemy_type: EnemyType::Wyvern, weight: 1}],
             },
             300..360=> EnemySpawnTable {
