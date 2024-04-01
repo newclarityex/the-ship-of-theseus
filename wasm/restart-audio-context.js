@@ -3,61 +3,10 @@
     // An array of all contexts to resume on the page
     const audioContextList = [];
 
-    // An array of various user interaction events we should listen for
-    const userInputEventNames = [
-        'click',
-        'contextmenu',
-        'auxclick',
-        'dblclick',
-        'mousedown',
-        'mouseup',
-        'pointerup',
-        'touchend',
-        'keydown',
-        'keyup',
-    ];
-
-    // A proxy object to intercept AudioContexts and
-    // add them to the array for tracking and resuming later
-    self.AudioContext = new Proxy(self.AudioContext, {
-        construct(target, args) {
-            const result = new target(...args);
-            audioContextList.push(result);
-            return result;
-        },
-    });
-
-    function delayedResume() {
-        setTimeout(() => {
-            resumeAllContexts()
-        }, 50);
-    }
-
-    // To resume all AudioContexts being tracked, apply delay for annoying frame issue
-    async function resumeAllContexts() {
-        let count = 0;
-
+    setInterval(() => {
+        audioContextList = audioContextList.filter(context => context.state === 'running');
         audioContextList.forEach(context => {
-            if (context.state !== 'running') {
-                context.resume();
-            } else {
-                count++;
-            }
+            context.resume();
         });
-
-        // If all the AudioContexts have now resumed then we
-        // unbind all the event listeners from the page to prevent
-        // unnecessary resume attempts
-        if (count == audioContextList.length) {
-            userInputEventNames.forEach(eventName => {
-                document.removeEventListener(eventName, delayedResume);
-            });
-        }
-    }
-
-    // We bind the resume function for each user interaction
-    // event on the page
-    userInputEventNames.forEach(eventName => {
-        document.addEventListener(eventName, delayedResume);
-    });
+    }, 100);
 })();
