@@ -288,7 +288,7 @@ fn setup_start_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     position_type: PositionType::Absolute,
                     width: Val::Percent(100.),
                     height: Val::Percent(100.),
-                    padding: UiRect::all(Val::Px(20.)),
+                    padding: UiRect::all(Val::Px(36.)),
                     justify_content: JustifyContent::Center,
                     align_items: AlignItems::Center,
                     ..default()
