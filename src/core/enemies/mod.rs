@@ -108,15 +108,15 @@ impl EnemySpawnTables {
     fn default() -> Self {
         EnemySpawnTables(range_map! {
             0..60 => EnemySpawnTable {
-                global_rate: 150,
-                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
-            },
-            60..120 => EnemySpawnTable {
                 global_rate: 250,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
             },
+            60..120 => EnemySpawnTable {
+                global_rate: 300,
+                enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 1}],
+            },
             120..180 => EnemySpawnTable {
-                global_rate: 350,
+                global_rate: 400,
                 enemy_rates: vec![EnemyRate { enemy_type: EnemyType::Serpent, weight: 2}, EnemyRate { enemy_type: EnemyType::Siren, weight: 2}, EnemyRate { enemy_type: EnemyType::EliteSerpent, weight: 1}],
             },
             180..240 => EnemySpawnTable {
